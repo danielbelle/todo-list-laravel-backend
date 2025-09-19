@@ -89,9 +89,9 @@ Configure the base structure for task management without user system.
 
 **Criteria Definition:**
 
--   [ ] v1.4 - Define basic business rules for tasks
--   [ ] v1.5 - Document simplified data structure
--   [ ] v1.6 - Validate functionality without user dependencies
+-   [x] v1.4 - Define basic business rules for tasks
+-   [x] v1.5 - Document simplified data structure
+-   [x] v1.6 - Validate functionality without user dependencies
 
 #### ✅ **Acceptance Criteria:**
 
@@ -112,7 +112,7 @@ Implement data access and business logic layers without authentication.
 
 **Repository Layer**
 
--   [ ] v2.0 - Create `TaskRepositoryInterface` without user filters
+-   [x] v2.0 - Create `TaskRepositoryInterface` without user filters
 -   [ ] v2.1 - Implement `TaskRepository` with basic operations
 -   [ ] v2.2 - Configure QueryableRepository for Tasks
 -   [ ] v2.3 - Add only essential filters (completed, search)
