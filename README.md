@@ -148,11 +148,11 @@ Create public RESTful endpoints for task management.
 
 -   [x] v3.0 - Create `TaskStoreRequest` without user_id validations
 -   [x] v3.1 - Create simplified `TaskUpdateRequest`
--   [ ] v3.2 - Implement only essential validations
+-   [x] v3.2 - Implement only essential validations
 
 **Response Formatting**
 
--   [ ] v3.3 - Create `TaskResource` for output formatting
+-   [x] v3.3 - Create `TaskResource` for output formatting
 -   [ ] v3.4 - Implement `TaskCollection` if necessary
 -   [ ] v3.5 - Standardize responses following ApiResponse trait
 
