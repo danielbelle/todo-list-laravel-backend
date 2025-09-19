@@ -114,20 +114,19 @@ Implement data access and business logic layers without authentication.
 
 -   [x] v2.0 - Create `TaskRepositoryInterface` without user filters
 -   [x] v2.1 - Implement `TaskRepository` with basic operations
--   [ ] v2.2 - Configure QueryableRepository for Tasks
--   [ ] v2.3 - Add only essential filters (completed, search)
+-   [x] v2.2 - Configure QueryableRepository for Tasks
+-   [x] v2.3 - Add only essential filters (completed, search)
 
 **Service Layer**
 
--   [ ] v2.4 - Create simplified `TaskServiceInterface`
+-   [x] v2.4 - Create simplified `TaskServiceInterface`
 -   [ ] v2.5 - Implement `TaskService` with basic operations
 -   [ ] v2.6 - Add basic business validations
--   [ ] v2.7 - Remove user-related validations
 
 **Configuration**
 
--   [ ] v2.8 - Register bindings in `RepositoryServiceProvider`
--   [ ] v2.9 - Register bindings in `ServiceClassProvider`
+-   [ ] v2.7 - Register bindings in `RepositoryServiceProvider`
+-   [ ] v2.8 - Register bindings in `ServiceClassProvider`
 
 #### ✅ **Acceptance Criteria:**
 
