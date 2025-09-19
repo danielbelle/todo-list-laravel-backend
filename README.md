@@ -147,7 +147,7 @@ Create public RESTful endpoints for task management.
 **Request Validation**
 
 -   [x] v3.0 - Create `TaskStoreRequest` without user_id validations
--   [ ] v3.1 - Create simplified `TaskUpdateRequest`
+-   [x] v3.1 - Create simplified `TaskUpdateRequest`
 -   [ ] v3.2 - Implement only essential validations
 
 **Response Formatting**
