@@ -125,8 +125,7 @@ Implement data access and business logic layers without authentication.
 
 **Configuration**
 
--   [ ] v2.7 - Register bindings in `RepositoryServiceProvider`
--   [ ] v2.8 - Register bindings in `ServiceClassProvider`
+-   [x] v2.7 - Register bindings in `RepositoryServiceProvider` and `ServiceClassProvider`
 
 #### ✅ **Acceptance Criteria:**
 

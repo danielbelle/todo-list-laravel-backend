@@ -15,6 +15,10 @@ class RepositoryServiceProvider extends ServiceProvider
     {
         // Register repository bindings here
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
+        $this->app->bind(
+            \App\Repositories\Task\Contracts\TaskRepositoryInterface::class,
+            \App\Repositories\Task\Concretes\TaskRepository::class
+        );
     }
 
     /**
