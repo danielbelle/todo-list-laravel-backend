@@ -82,16 +82,16 @@ Configure the base structure for task management without user system.
 
 **Database & Models**
 
--   [ ] Create simplified migration for `tasks` table (with soft delete support)
--   [ ] Implement basic `Task` model (with SoftDeletes trait)
--   [ ] Define Factory for `Task` without user_id
--   [ ] Create Seeder for test data
+-   [x] v1.0 - Create simplified migration for `tasks` table (with soft delete support)
+-   [ ] v1.1 - Implement basic `Task` model (with SoftDeletes trait)
+-   [ ] v1.2 - Define Factory for `Task` without user_id
+-   [ ] v1.3 - Create Seeder for test data
 
 **Criteria Definition:**
 
--   [ ] Define basic business rules for tasks
--   [ ] Document simplified data structure
--   [ ] Validate functionality without user dependencies
+-   [ ] v1.4 - Define basic business rules for tasks
+-   [ ] v1.5 - Document simplified data structure
+-   [ ] v1.6 - Validate functionality without user dependencies
 
 #### ✅ **Acceptance Criteria:**
 
@@ -112,22 +112,22 @@ Implement data access and business logic layers without authentication.
 
 **Repository Layer**
 
--   [ ] Create `TaskRepositoryInterface` without user filters
--   [ ] Implement `TaskRepository` with basic operations
--   [ ] Configure QueryableRepository for Tasks
--   [ ] Add only essential filters (completed, search)
+-   [ ] v2.0 - Create `TaskRepositoryInterface` without user filters
+-   [ ] v2.1 - Implement `TaskRepository` with basic operations
+-   [ ] v2.2 - Configure QueryableRepository for Tasks
+-   [ ] v2.3 - Add only essential filters (completed, search)
 
 **Service Layer**
 
--   [ ] Create simplified `TaskServiceInterface`
--   [ ] Implement `TaskService` with basic operations
--   [ ] Add basic business validations
--   [ ] Remove user-related validations
+-   [ ] v2.4 - Create simplified `TaskServiceInterface`
+-   [ ] v2.5 - Implement `TaskService` with basic operations
+-   [ ] v2.6 - Add basic business validations
+-   [ ] v2.7 - Remove user-related validations
 
 **Configuration**
 
--   [ ] Register bindings in `RepositoryServiceProvider`
--   [ ] Register bindings in `ServiceClassProvider`
+-   [ ] v2.8 - Register bindings in `RepositoryServiceProvider`
+-   [ ] v2.9 - Register bindings in `ServiceClassProvider`
 
 #### ✅ **Acceptance Criteria:**
 
@@ -148,29 +148,29 @@ Create public RESTful endpoints for task management.
 
 **Request Validation**
 
--   [ ] Create `TaskStoreRequest` without user_id validations
--   [ ] Create simplified `TaskUpdateRequest`
--   [ ] Implement only essential validations
+-   [ ] v3.0 - Create `TaskStoreRequest` without user_id validations
+-   [ ] v3.1 - Create simplified `TaskUpdateRequest`
+-   [ ] v3.2 - Implement only essential validations
 
 **Response Formatting**
 
--   [ ] Create `TaskResource` for output formatting
--   [ ] Implement `TaskCollection` if necessary
--   [ ] Standardize responses following ApiResponse trait
+-   [ ] v3.3 - Create `TaskResource` for output formatting
+-   [ ] v3.4 - Implement `TaskCollection` if necessary
+-   [ ] v3.5 - Standardize responses following ApiResponse trait
 
 **Controller**
 
--   [ ] Implement `TaskController` with public endpoints
--   [ ] Complete CRUD endpoints (index, store, show, update, destroy with soft delete)
--   [ ] Implement basic filters and search (excluding soft deleted)
--   [ ] Add pagination
--   [ ] Remove authorization checks
--   [ ] Add endpoint to restore soft deleted tasks (optional)
+-   [ ] v3.6 - Implement `TaskController` with public endpoints
+-   [ ] v3.7 - Complete CRUD endpoints (index, store, show, update, destroy with soft delete)
+-   [ ] v3.8 - Implement basic filters and search (excluding soft deleted)
+-   [ ] v3.9 - Add pagination
+-   [ ] v3.10 - Remove authorization checks
+-   [ ] v3.11 - Add endpoint to restore soft deleted tasks (optional)
 
 **Routes**
 
--   [ ] Define routes in `routes/v1/api.php`
--   [ ] Organize public route grouping
+-   [ ] v3.12 - Define routes in `routes/v1/api.php`
+-   [ ] v3.13 - Organize public route grouping
 
 #### ✅ **Acceptance Criteria:**
 
@@ -191,24 +191,24 @@ Ensure quality through basic tests and clear documentation.
 
 **Unit Tests**
 
--   [ ] Tests for TaskService (basic operations)
--   [ ] Tests for TaskRepository
--   [ ] Tests for Request validations
--   [ ] Tests for TaskResource
+-   [ ] v4.0 - Tests for TaskService (basic operations)
+-   [ ] v4.1 - Tests for TaskRepository
+-   [ ] v4.2 - Tests for Request validations
+-   [ ] v4.3 - Tests for TaskResource
 
 **Feature Tests**
 
--   [ ] Tests for TaskController (all public endpoints)
--   [ ] Basic filter and search tests
--   [ ] Pagination tests
--   [ ] Basic edge case tests
+-   [ ] v4.4 - Tests for TaskController (all public endpoints)
+-   [ ] v4.5 - Basic filter and search tests
+-   [ ] v4.6 - Pagination tests
+-   [ ] v4.7 - Basic edge case tests
 
 **Documentation**
 
--   [ ] Document endpoints in Postman/Insomnia collection
--   [ ] Update README with public API information
--   [ ] Document basic use cases and examples
--   [ ] Specify that API is public (no authentication)
+-   [ ] v4.8 - Document endpoints in Postman/Insomnia collection
+-   [ ] v4.9 - Update README with public API information
+-   [ ] v4.10 - Document basic use cases and examples
+-   [ ] v4.11 - Specify that API is public (no authentication)
 
 #### ✅ **Acceptance Criteria:**
 
@@ -229,38 +229,38 @@ Implement user system and authentication in the existing API.
 
 **Database Migration**
 
--   [ ] Create migration to add `user_id` field to tasks table
--   [ ] Update Factory to include user_id
--   [ ] Create new seeder with relationships
+-   [ ] v5.0 - Create migration to add `user_id` field to tasks table
+-   [ ] v5.1 - Update Factory to include user_id
+-   [ ] v5.2 - Create new seeder with relationships
 
 **Model Updates**
 
--   [ ] Update `Task` model with `belongsTo(User)` relationship
--   [ ] Update `User` model with `hasMany(Task)` relationship
+-   [ ] v5.3 - Update `Task` model with `belongsTo(User)` relationship
+-   [ ] v5.4 - Update `User` model with `hasMany(Task)` relationship
 
 **Authentication & Authorization**
 
--   [ ] Implement JWT authentication in endpoints
--   [ ] Add authentication middleware to routes
--   [ ] Implement authorization (user only accesses their tasks)
+-   [ ] v5.5 - Implement JWT authentication in endpoints
+-   [ ] v5.6 - Add authentication middleware to routes
+-   [ ] v5.7 - Implement authorization (user only accesses their tasks)
 
 **Service Layer Updates**
 
--   [ ] Update `TaskService` with ownership validations
--   [ ] Add user filters in `TaskRepository`
--   [ ] Implement authorization logic
+-   [ ] v5.8 - Update `TaskService` with ownership validations
+-   [ ] v5.9 - Add user filters in `TaskRepository`
+-   [ ] v5.10 - Implement authorization logic
 
 **Controller Updates**
 
--   [ ] Update `TaskController` to use authenticated user context
--   [ ] Add authorization checks
--   [ ] Filter tasks by logged user
+-   [ ] v5.11 - Update `TaskController` to use authenticated user context
+-   [ ] v5.12 - Add authorization checks
+-   [ ] v5.13 - Filter tasks by logged user
 
 **Testing Updates**
 
--   [ ] Update tests to include authentication
--   [ ] Authorization tests
--   [ ] Relationship tests
+-   [ ] v5.14 - Update tests to include authentication
+-   [ ] v5.15 - Authorization tests
+-   [ ] v5.16 - Relationship tests
 
 #### ✅ **Acceptance Criteria:**
 
@@ -271,6 +271,7 @@ Implement user system and authentication in the existing API.
 
 ---
 
+<!--
 ## 🚀 **Definition of Ready**
 
 For each backlog item, check:
@@ -290,6 +291,7 @@ To consider a task complete:
 -   [ ] Documentation updated
 -   [ ] Test environment deployment completed
 -   [ ] Performance validated
+        -->
 
 ## 🛠️ **Useful Commands**
 
@@ -344,7 +346,7 @@ app/
 │       └── TaskResource.php
 database/
 ├── migrations/
-│   └── xxxx_xx_xx_xxxxxx_create_tasks_table.php (without user_id)
+│   └── 2025_09_19_130810_create_tasks_table.php (without user_id)
 ├── factories/
 │   └── TaskFactory.php (without user_id)
 └── seeders/
@@ -358,13 +360,14 @@ routes/v1/
 └── api.php (public routes)
 ```
 
-## 📈 **Success Metrics - Initial Phase**
+<!--## 📈 **Success Metrics - Initial Phase**
 
 -   **Code Coverage:** Minimum 70% (initial phase)
 -   **Response Time:** < 200ms for basic endpoints
 -   **Uptime:** 99.9%
 -   **PSR-12 Compliance:** 100%
 -   **Zero Security Vulnerabilities:** Validated by tools
+-->
 
 ## 🔄 **Evolution Roadmap**
 
