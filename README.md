@@ -85,7 +85,7 @@ Configure the base structure for task management without user system.
 -   [x] v1.0 - Create simplified migration for `tasks` table (with soft delete support)
 -   [x] v1.1 - Implement basic `Task` model (with SoftDeletes trait)
 -   [x] v1.2 - Define Factory for `Task` without user_id
--   [ ] v1.3 - Create Seeder for test data
+-   [x] v1.3 - Create Seeder for test data
 
 **Criteria Definition:**
 

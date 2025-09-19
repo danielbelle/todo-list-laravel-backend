@@ -12,9 +12,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Run the test users seeder for query builder testing
+        // Run the test users seeder for query builder testing. And TaskSeeder.
         $this->call([
             TestUsersSeeder::class,
+            TaskSeeder::class,
         ]);
     }
 }
