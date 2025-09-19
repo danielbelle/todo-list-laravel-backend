@@ -120,8 +120,8 @@ Implement data access and business logic layers without authentication.
 **Service Layer**
 
 -   [x] v2.4 - Create simplified `TaskServiceInterface`
--   [ ] v2.5 - Implement `TaskService` with basic operations
--   [ ] v2.6 - Add basic business validations
+-   [x] v2.5 - Implement `TaskService` with basic operations
+-   [x] v2.6 - Add basic business validations
 
 **Configuration**
 
