@@ -113,7 +113,7 @@ Implement data access and business logic layers without authentication.
 **Repository Layer**
 
 -   [x] v2.0 - Create `TaskRepositoryInterface` without user filters
--   [ ] v2.1 - Implement `TaskRepository` with basic operations
+-   [x] v2.1 - Implement `TaskRepository` with basic operations
 -   [ ] v2.2 - Configure QueryableRepository for Tasks
 -   [ ] v2.3 - Add only essential filters (completed, search)
 
