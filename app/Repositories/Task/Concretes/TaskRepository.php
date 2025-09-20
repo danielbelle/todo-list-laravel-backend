@@ -60,7 +60,8 @@ class TaskRepository implements TaskRepositoryInterface
     private function applyFilters($query, array $filters)
     {
         if (isset($filters['completed'])) {
-            $query->where('completed', $filters['completed']);
+            $completed = filter_var($filters['completed'], FILTER_VALIDATE_BOOLEAN);
+            $query->where('completed', $completed);
         }
 
         if (isset($filters['search'])) {
