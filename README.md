@@ -188,7 +188,7 @@ Ensure quality through basic tests and clear documentation.
 
 -   [x] v4.0 - Tests for TaskService (basic operations)
 -   [x] v4.1 - Tests for TaskRepository
--   [ ] v4.2 - Tests for Request validations
+-   [x] v4.2 - Tests for Request validations
 -   [ ] v4.3 - Tests for TaskResource
 
 **Feature Tests**
