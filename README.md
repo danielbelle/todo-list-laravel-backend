@@ -153,22 +153,19 @@ Create public RESTful endpoints for task management.
 **Response Formatting**
 
 -   [x] v3.3 - Create `TaskResource` for output formatting
--   [ ] v3.4 - Implement `TaskCollection` if necessary
--   [ ] v3.5 - Standardize responses following ApiResponse trait
+-   [x] v3.4 - Implement `TaskCollection` if necessary
+-   [] v3.5 - Standardize responses following ApiResponse trait
 
 **Controller**
 
 -   [ ] v3.6 - Implement `TaskController` with public endpoints
 -   [ ] v3.7 - Complete CRUD endpoints (index, store, show, update, destroy with soft delete)
 -   [ ] v3.8 - Implement basic filters and search (excluding soft deleted)
--   [ ] v3.9 - Add pagination
--   [ ] v3.10 - Remove authorization checks
--   [ ] v3.11 - Add endpoint to restore soft deleted tasks (optional)
 
 **Routes**
 
--   [ ] v3.12 - Define routes in `routes/v1/api.php`
--   [ ] v3.13 - Organize public route grouping
+-   [ ] v3.9 - Define routes in `routes/v1/api.php`
+-   [ ] v3.10 - Organize public route grouping
 
 #### ✅ **Acceptance Criteria:**
 

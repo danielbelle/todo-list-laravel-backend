@@ -23,3 +23,5 @@ yarn-error.log
 /.zed
 README-copy.md
 /zdevcontainer
+test_tasks.sh
+log_test_tasks.txt
