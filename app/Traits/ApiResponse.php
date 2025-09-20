@@ -13,10 +13,18 @@ trait ApiResponse
      */
     public function successResponse(mixed $data, int $code = Response::HTTP_OK): JsonResponse
     {
-        $response = [
-            'success' => true,
-            'data' => $data
-        ];
+        $response = ['success' => true];
+
+        if (
+            $data instanceof \Illuminate\Http\Resources\Json\ResourceCollection &&
+            method_exists($data, 'response') &&
+            isset($data->resource) &&
+            $data->resource instanceof \Illuminate\Pagination\AbstractPaginator
+        ) {
+            $response = array_merge($response, $data->response()->getData(true));
+        } else {
+            $response['data'] = $data;
+        }
 
         return response()->json($response, $code);
     }
