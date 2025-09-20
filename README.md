@@ -159,7 +159,7 @@ Create public RESTful endpoints for task management.
 **Controller**
 
 -   [x] v3.6 - Implement `TaskController` with public endpoints
--   [ ] v3.7 - Complete CRUD endpoints (index, store, show, update, destroy with soft delete)
+-   [x] v3.7 - Complete CRUD endpoints (index, store, show, update, destroy with soft delete)
 -   [ ] v3.8 - Implement basic filters and search (excluding soft deleted)
 
 **Routes**

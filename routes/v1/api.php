@@ -1,7 +1,8 @@
 <?php
 
-use App\Http\Controllers\Api\V1\AuthController;
-use App\Http\Controllers\Api\V1\UserController;
+//use App\Http\Controllers\Api\V1\AuthController;
+//use App\Http\Controllers\Api\V1\UserController;
+use App\Http\Controllers\Api\V1\TaskController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,7 +16,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Authentication Routes
+// Authentication Routes MVP will not use authentication for now
+/*
 Route::name('auth.')
     ->prefix('auth')
     ->group(function () {
@@ -34,4 +36,15 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('users/active', [UserController::class, 'active'])->name('users.active');
     Route::get('users/all', [UserController::class, 'all'])->name('users.all');
     Route::apiResource('users', UserController::class)->names('users');
+});
+*/
+// Task Routes
+Route::prefix('tasks')->group(function () {
+    Route::get('/', [TaskController::class, 'index']);
+    Route::post('/', [TaskController::class, 'store']);
+    Route::get('/{id}', [TaskController::class, 'show']);
+    Route::put('/{id}', [TaskController::class, 'update']);
+    Route::delete('/{id}', [TaskController::class, 'destroy']);
+    Route::patch('/{id}/complete', [TaskController::class, 'complete']);
+    Route::patch('/{id}/pending', [TaskController::class, 'pending']);
 });
