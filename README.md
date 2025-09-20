@@ -193,7 +193,7 @@ Ensure quality through basic tests and clear documentation.
 
 **Feature Tests**
 
--   [ ] v4.4 - Tests for TaskController (all public endpoints)
+-   [x] v4.4 - Tests for TaskController (all public endpoints)
 -   [ ] v4.5 - Basic filter and search tests
 -   [ ] v4.6 - Pagination tests
 -   [ ] v4.7 - Basic edge case tests
