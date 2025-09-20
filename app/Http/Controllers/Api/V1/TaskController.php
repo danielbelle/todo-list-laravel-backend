@@ -74,9 +74,10 @@ class TaskController extends BaseApiController
             }
 
             return $this->successResponse(new TaskResource($task));
-        } catch (ModelNotFoundException $e) {
-            return $this->notFoundResponse('Task not found');
         } catch (\Throwable $e) {
+            if (str_contains($e->getMessage(), 'Task not found')) {
+                return $this->notFoundResponse('Task not found');
+            }
             Log::error("TaskController@update error for id {$id}", ['exception' => $e]);
             return $this->errorResponse('Could not update task', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
@@ -106,9 +107,10 @@ class TaskController extends BaseApiController
             }
 
             return $this->successResponse(new TaskResource($task));
-        } catch (ModelNotFoundException $e) {
-            return $this->notFoundResponse('Task not found');
         } catch (\Throwable $e) {
+            if (str_contains($e->getMessage(), 'Task not found')) {
+                return $this->notFoundResponse('Task not found');
+            }
             Log::error("TaskController@complete error for id {$id}", ['exception' => $e]);
             return $this->errorResponse('Could not complete task', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
@@ -123,9 +125,11 @@ class TaskController extends BaseApiController
             }
 
             return $this->successResponse(new TaskResource($task));
-        } catch (ModelNotFoundException $e) {
-            return $this->notFoundResponse('Task not found');
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
+            if (str_contains($e->getMessage(), 'Task not found')) {
+                return $this->notFoundResponse('Task not found');
+            }
+
             Log::error("TaskController@pending error for id {$id}", ['exception' => $e]);
             return $this->errorResponse('Could not mark task as pending', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
