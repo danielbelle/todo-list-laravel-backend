@@ -47,28 +47,6 @@ class TaskRepository implements TaskRepositoryInterface
         return $task->delete();
     }
 
-    public function restore(int $id): bool
-    {
-        $task = Task::onlyTrashed()->find($id);
-
-        if (!$task) {
-            return false;
-        }
-
-        return $task->restore();
-    }
-
-    public function forceDelete(int $id): bool
-    {
-        $task = Task::onlyTrashed()->find($id);
-
-        if (!$task) {
-            return false;
-        }
-
-        return $task->forceDelete();
-    }
-
     public function complete(int $id): bool
     {
         return $this->update($id, ['completed' => true]);

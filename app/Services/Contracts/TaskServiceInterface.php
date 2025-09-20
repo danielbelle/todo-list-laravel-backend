@@ -12,8 +12,6 @@ interface TaskServiceInterface
     public function createTask(array $data): Task;
     public function updateTask(int $id, array $data): Task;
     public function deleteTask(int $id): bool;
-    public function restoreTask(int $id): Task;
-    public function forceDeleteTask(int $id): bool;
     public function completeTask(int $id): Task;
     public function pendingTask(int $id): Task;
 }

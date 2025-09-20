@@ -13,8 +13,6 @@ interface TaskRepositoryInterface
     public function create(array $data): Task;
     public function update(int $id, array $data): bool;
     public function delete(int $id): bool;
-    public function restore(int $id): bool;
-    public function forceDelete(int $id): bool;
     public function complete(int $id): bool;
     public function pending(int $id): bool;
 }

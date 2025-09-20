@@ -42,20 +42,6 @@ class TaskService implements TaskServiceInterface
         return $this->taskRepository->delete($id);
     }
 
-    public function restoreTask(int $id): Task
-    {
-        if (!$this->taskRepository->restore($id)) {
-            throw new \Exception('Task not found or could not be restored');
-        }
-
-        return $this->getTaskById($id);
-    }
-
-    public function forceDeleteTask(int $id): bool
-    {
-        return $this->taskRepository->forceDelete($id);
-    }
-
     public function completeTask(int $id): Task
     {
         if (!$this->taskRepository->complete($id)) {

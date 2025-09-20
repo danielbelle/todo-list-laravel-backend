@@ -22,7 +22,7 @@ class TaskStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required|string|max:255',
+            'title' => 'required|string|max:255|min:3',
         ];
     }
 
@@ -31,6 +31,8 @@ class TaskStoreRequest extends FormRequest
         return [
             'title.required' => 'The title is required.',
             'title.max' => 'The title must not be greater than 255 characters.',
+            'title.string' => 'The title must be a string.',
+            'title.min' => 'The title must be at least 3 characters long.',
         ];
     }
 }
