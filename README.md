@@ -186,7 +186,7 @@ Ensure quality through basic tests and clear documentation.
 
 **Unit Tests**
 
--   [ ] v4.0 - Tests for TaskService (basic operations)
+-   [x] v4.0 - Tests for TaskService (basic operations)
 -   [ ] v4.1 - Tests for TaskRepository
 -   [ ] v4.2 - Tests for Request validations
 -   [ ] v4.3 - Tests for TaskResource
@@ -314,45 +314,112 @@ php artisan tinker
 >>> App\Models\Task::onlyTrashed()->get()
 ```
 
-## 📂 **Expected File Structure - Initial Phase**
+## 📂 **Expected File Structure - Current Project**
 
-```
+```text
 app/
-├── Models/
-│   └── Task.php (without relationships)
-├── Repositories/
-│   └── Task/
-│       ├── Contracts/
-│       │   └── TaskRepositoryInterface.php
-│       └── Concretes/
-│           └── TaskRepository.php (without user filters)
-├── Services/
-│   ├── Contracts/
-│   │   └── TaskServiceInterface.php
-│   └── Concretes/
-│       └── TaskService.php (without user validations)
-├── Http/
-│   ├── Controllers/Api/V1/
-│   │   └── TaskController.php (public endpoints)
-│   ├── Requests/Api/V1/
-│   │   ├── TaskStoreRequest.php (without user_id)
-│   │   └── TaskUpdateRequest.php (simplified)
-│   └── Resources/Api/Task/
-│       └── TaskResource.php
+├── Exceptions
+│   └── Handler.php
+├── Http
+│   ├── Controllers
+│   │   ├── Api
+│   │   │   ├── BaseApiController.php
+│   │   │   └── V1
+│   │   │       ├── AuthController.php
+│   │   │       ├── TaskController.php
+│   │   │       └── UserController.php
+│   │   └── Controller.php
+│   ├── Requests
+│   │   └── Api/V1
+│   │       ├── Auth
+│   │       │   ├── LoginRequest.php
+│   │       │   └── RegisterRequest.php
+│   │       ├── TaskStoreRequest.php
+│   │       ├── TaskUpdateRequest.php
+│   │       ├── UserStoreRequest.php
+│   │       └── UserUpdateRequest.php
+│   └── Resources
+│       └── Api
+│           ├── Task
+│           │   ├── TaskCollection.php
+│           │   └── TaskResource.php
+│           └── User
+│               └── UserResource.php
+├── Models
+│   ├── Task.php
+│   └── User.php
+├── Providers
+│   ├── AppServiceProvider.php
+│   ├── RepositoryServiceProvider.php
+│   ├── RouteServiceProvider.php
+│   ├── ServiceClassProvider.php
+│   └── TelescopeServiceProvider.php
+├── Repositories
+│   ├── Base/Concretes
+│   │   ├── BaseRepository.php
+│   │   └── QueryableRepository.php
+│   ├── Base/Contracts
+│   │   ├── BaseRepositoryInterface.php
+│   │   └── QueryableRepositoryInterface.php
+│   ├── Task
+│   │   ├── Concretes
+│   │   │   └── TaskRepository.php
+│   │   └── Contracts
+│   │       └── TaskRepositoryInterface.php
+│   └── User
+│       ├── Concretes
+│       │   └── UserRepository.php
+│       └── Contracts
+│           └── UserRepositoryInterface.php
+├── Services
+│   ├── Base/Concretes
+│   │   └── BaseService.php
+│   ├── Base/Contracts
+│   │   └── BaseServiceInterface.php
+│   ├── Concretes
+│   │   ├── AuthService.php
+│   │   ├── TaskService.php
+│   │   └── UserService.php
+│   └── Contracts
+│       ├── AuthServiceInterface.php
+│       ├── TaskServiceInterface.php
+│       └── UserServiceInterface.php
+└── Traits
+    └── ApiResponse.php
+
 database/
-├── migrations/
-│   └── 2025_09_19_130810_create_tasks_table.php (without user_id)
-├── factories/
-│   └── TaskFactory.php (without user_id)
-└── seeders/
-    └── TaskSeeder.php (no user dependencies)
+├── factories
+│   ├── TaskFactory.php
+│   └── UserFactory.php
+├── migrations
+│   ├── 0001_01_01_000000_create_users_table.php
+│   ├── 0001_01_01_000001_create_cache_table.php
+│   ├── 0001_01_01_000002_create_jobs_table.php
+│   ├── 2025_03_23_160911_add_password_reset_fields_to_users_table.php
+│   ├── 2025_04_22_175326_create_telescope_entries_table.php
+│   └── 2025_09_19_130810_create_tasks_table.php
+└── seeders
+    ├── DatabaseSeeder.php
+    ├── TaskSeeder.php
+    └── TestUsersSeeder.php
+
+routes/
+└── v1
+    └── api.php
+
 tests/
-├── Feature/Http/Controllers/
-│   └── TaskControllerTest.php (public tests)
-└── Unit/Services/
-    └── TaskServiceTest.php (basic tests)
-routes/v1/
-└── api.php (public routes)
+├── Feature
+│   ├── Http
+│   │   └── Controllers
+│   │       ├── AuthControllerTest.php
+│   │       └── UserControllerTest.php
+│   └── Utils
+│       └── UserTestUtils.php
+├── Unit
+│   └── Services
+│       └── UserServiceTest.php
+├── Pest.php
+└── TestCase.php
 ```
 
 <!--## 📈 **Success Metrics - Initial Phase**

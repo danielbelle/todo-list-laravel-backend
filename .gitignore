@@ -21,7 +21,8 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
 README-copy.md
-/zdevcontainer
-test_tasks.sh
+testtasks.sh
 log_test_tasks.txt
+tests.txt
