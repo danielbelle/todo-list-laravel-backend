@@ -160,12 +160,12 @@ Create public RESTful endpoints for task management.
 
 -   [x] v3.6 - Implement `TaskController` with public endpoints
 -   [x] v3.7 - Complete CRUD endpoints (index, store, show, update, destroy with soft delete)
--   [ ] v3.8 - Implement basic filters and search (excluding soft deleted)
+-   [x] v3.8 - Implement basic filters and search. Simplify Task structure
 
 **Routes**
 
--   [ ] v3.9 - Define routes in `routes/v1/api.php`
--   [ ] v3.10 - Organize public route grouping
+-   [x] v3.9 - Define routes in `routes/v1/api.php`
+-   [x] v3.10 - Organize public route grouping
 
 #### ✅ **Acceptance Criteria:**
 
