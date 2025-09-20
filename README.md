@@ -154,7 +154,7 @@ Create public RESTful endpoints for task management.
 
 -   [x] v3.3 - Create `TaskResource` for output formatting
 -   [x] v3.4 - Implement `TaskCollection` if necessary
--   [] v3.5 - Standardize responses following ApiResponse trait
+-   [x] v3.5 - Standardize responses following ApiResponse trait
 
 **Controller**
 

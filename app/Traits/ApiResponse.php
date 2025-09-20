@@ -13,23 +13,23 @@ trait ApiResponse
      */
     public function successResponse(mixed $data, int $code = Response::HTTP_OK): JsonResponse
     {
-        // Handle the pagination case.
-        if ($data instanceof JsonResource) {
-            // Get the fully transformed data (includes pagination, links, etc.)
-            $resourceData = $data->response()->getData(true);
+        $response = [
+            'success' => true,
+            'data' => $data
+        ];
 
-            return response()->json($resourceData, $code);
-        }
-
-        return response()->json(['data' => $data], $code);
+        return response()->json($response, $code);
     }
 
     /**
      * Return an error JSON response.
      */
-    public function errorResponse($message, int $code): JsonResponse
+    public function errorResponse(string $message, int $code): JsonResponse
     {
-        return response()->json(['error' => $message], $code);
+        return response()->json([
+            'success' => false,
+            'message' => $message
+        ], $code);
     }
 
     /**
