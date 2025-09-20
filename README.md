@@ -187,7 +187,7 @@ Ensure quality through basic tests and clear documentation.
 **Unit Tests**
 
 -   [x] v4.0 - Tests for TaskService (basic operations)
--   [ ] v4.1 - Tests for TaskRepository
+-   [x] v4.1 - Tests for TaskRepository
 -   [ ] v4.2 - Tests for Request validations
 -   [ ] v4.3 - Tests for TaskResource
 
