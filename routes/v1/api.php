@@ -39,12 +39,15 @@ Route::group(['middleware' => 'auth:api'], function () {
 });
 */
 // Task Routes
-Route::prefix('tasks')->group(function () {
-    Route::get('/', [TaskController::class, 'index']);
-    Route::post('/', [TaskController::class, 'store']);
-    Route::get('/{id}', [TaskController::class, 'show']);
-    Route::put('/{id}', [TaskController::class, 'update']);
-    Route::delete('/{id}', [TaskController::class, 'destroy']);
-    Route::patch('/{id}/complete', [TaskController::class, 'complete']);
-    Route::patch('/{id}/pending', [TaskController::class, 'pending']);
+Route::middleware(['throttle:60,1'])->group(function () {
+
+    Route::prefix('tasks')->group(function () {
+        Route::get('/', [TaskController::class, 'index']);
+        Route::post('/', [TaskController::class, 'store']);
+        Route::get('/{id}', [TaskController::class, 'show']);
+        Route::put('/{id}', [TaskController::class, 'update']);
+        Route::delete('/{id}', [TaskController::class, 'destroy']);
+        Route::patch('/{id}/complete', [TaskController::class, 'complete']);
+        Route::patch('/{id}/pending', [TaskController::class, 'pending']);
+    });
 });
