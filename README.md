@@ -200,7 +200,7 @@ Ensure quality through basic tests and clear documentation.
 
 **Documentation**
 
--   [ ] v4.8 - Document endpoints in Postman/Insomnia collection
+-   [x] v4.8 - Document endpoints in Postman/Insomnia collection
 -   [ ] v4.9 - Update README with public API information
 -   [ ] v4.10 - Document basic use cases and examples
 -   [ ] v4.11 - Specify that API is public (no authentication)
