@@ -162,4 +162,75 @@ class TaskControllerTest extends TestCase
 
         $response->assertStatus(404);
     }
+
+    public function test_index_pagination(): void
+    {
+        Task::factory()->count(25)->create();
+
+        $response = $this->getJson('/api/v1/tasks?per_page=10&page=2');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'meta' => [
+                    'total' => 25,
+                    'per_page' => 10,
+                    'current_page' => 2,
+                    'last_page' => 3
+                ]
+            ]);
+    }
+
+    public function test_index_with_multiple_filters(): void
+    {
+        Task::factory()->create(['title' => 'Important task', 'completed' => true]);
+        Task::factory()->create(['title' => 'Another task', 'completed' => true]);
+        Task::factory()->create(['title' => 'Important but pending', 'completed' => false]);
+
+        $response = $this->getJson('/api/v1/tasks?search=Important&completed=true');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonFragment(['title' => 'Important task']);
+    }
+
+    public function test_update_task_validation(): void
+    {
+        $task = Task::factory()->create();
+
+        $response = $this->putJson("/api/v1/tasks/{$task->id}", ['title' => '']);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['title']);
+    }
+
+    public function test_search_with_empty_string(): void
+    {
+        Task::factory()->count(3)->create();
+
+        $response = $this->getJson('/api/v1/tasks?search=');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(3, 'data');
+    }
+
+    public function test_invalid_boolean_filter(): void
+    {
+        $response = $this->getJson('/api/v1/tasks?completed=invalid');
+
+        $response->assertStatus(200);
+    }
+
+    public function test_index_excludes_soft_deleted_tasks(): void
+    {
+        $task1 = Task::factory()->create();
+        $task2 = Task::factory()->create();
+        $task2->delete();
+
+        $response = $this->getJson('/api/v1/tasks');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonFragment(['id' => $task1->id])
+            ->assertJsonMissing(['id' => $task2->id]);
+    }
 }

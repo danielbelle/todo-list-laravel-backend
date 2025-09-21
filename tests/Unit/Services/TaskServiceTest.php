@@ -179,4 +179,48 @@ class TaskServiceTest extends TestCase
 
         $this->service->pendingTask(1);
     }
+
+    public function test_get_all_tasks_with_filters(): void
+    {
+        $paginator = new LengthAwarePaginator([], 0, 15);
+        $filters = ['completed' => true, 'search' => 'test'];
+
+        $this->repositoryMock->shouldReceive('all')
+            ->with($filters, 15)
+            ->once()
+            ->andReturn($paginator);
+
+        $result = $this->service->getAllTasks($filters);
+
+        $this->assertInstanceOf(LengthAwarePaginator::class, $result);
+    }
+
+    public function test_get_all_tasks_with_custom_per_page(): void
+    {
+        $paginator = new LengthAwarePaginator([], 0, 20);
+
+        $this->repositoryMock->shouldReceive('all')
+            ->with([], 20)
+            ->once()
+            ->andReturn($paginator);
+
+        $result = $this->service->getAllTasks([], 20);
+
+        $this->assertInstanceOf(LengthAwarePaginator::class, $result);
+        $this->assertEquals(20, $result->perPage());
+    }
+
+    public function test_get_all_tasks_with_empty_filters(): void
+    {
+        $paginator = new LengthAwarePaginator([], 0, 15);
+
+        $this->repositoryMock->shouldReceive('all')
+            ->with([], 15)
+            ->once()
+            ->andReturn($paginator);
+
+        $result = $this->service->getAllTasks([]);
+
+        $this->assertInstanceOf(LengthAwarePaginator::class, $result);
+    }
 }

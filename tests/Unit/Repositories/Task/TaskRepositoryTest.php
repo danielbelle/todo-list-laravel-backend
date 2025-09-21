@@ -144,4 +144,35 @@ class TaskRepositoryTest extends TestCase
         $this->assertEquals(1, $result->total());
         $this->assertEquals('Find this task', $result->first()->title);
     }
+
+    public function test_all_with_pagination_and_filters(): void
+    {
+        Task::factory()->count(8)->create(['completed' => true]);
+        Task::factory()->count(5)->create(['completed' => false]);
+
+        $result = $this->repository->all(['completed' => true], 5);
+
+        $this->assertInstanceOf(LengthAwarePaginator::class, $result);
+        $this->assertEquals(5, $result->perPage());
+        $this->assertEquals(8, $result->total());
+        $this->assertEquals(2, $result->lastPage());
+    }
+
+    public function test_all_with_search_filter_empty(): void
+    {
+        Task::factory()->count(3)->create();
+
+        $result = $this->repository->all(['search' => '']);
+
+        $this->assertEquals(3, $result->total());
+    }
+
+    public function test_all_with_invalid_filter(): void
+    {
+        Task::factory()->count(3)->create();
+
+        $result = $this->repository->all(['invalid_filter' => 'value']);
+
+        $this->assertEquals(3, $result->total());
+    }
 }

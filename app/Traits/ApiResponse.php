@@ -2,9 +2,13 @@
 
 namespace App\Traits;
 
+use App\Http\Resources\Api\Task\TaskCollection;
+use App\Models\Task;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Pagination\AbstractPaginator;
 
 trait ApiResponse
 {
@@ -16,12 +20,14 @@ trait ApiResponse
         $response = ['success' => true];
 
         if (
-            $data instanceof \Illuminate\Http\Resources\Json\ResourceCollection &&
+            $data instanceof ResourceCollection &&
             method_exists($data, 'response') &&
             isset($data->resource) &&
-            $data->resource instanceof \Illuminate\Pagination\AbstractPaginator
+            $data->resource instanceof AbstractPaginator
         ) {
-            $response = array_merge($response, $data->response()->getData(true));
+            $collectionArray = $data->toArray(request());
+
+            $response = array_merge($response, $collectionArray);
         } else {
             $response['data'] = $data;
         }
