@@ -11,8 +11,9 @@ class TaskRepository implements TaskRepositoryInterface
     public function all(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
         $query = Task::query();
+        $validPerPage = $this->validatePerPage($perPage);
 
-        return $this->applyFilters($query, $filters)->paginate($perPage);
+        return $this->applyFilters($query, $filters)->paginate($validPerPage);
     }
 
     public function find(int $id): ?Task
@@ -77,5 +78,22 @@ class TaskRepository implements TaskRepositoryInterface
         }
 
         return $query;
+    }
+
+    private function validatePerPage(int $perPage): int
+    {
+
+        $minPerPage = 1;
+        $maxPerPage = 100;
+
+        if ($perPage < $minPerPage) {
+            return $minPerPage;
+        }
+
+        if ($perPage > $maxPerPage) {
+            return $maxPerPage;
+        }
+
+        return $perPage;
     }
 }

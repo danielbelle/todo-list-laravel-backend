@@ -15,7 +15,9 @@ class TaskService implements TaskServiceInterface
 
     public function getAllTasks(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        return $this->taskRepository->all($filters, $perPage);
+        $validPerPage = max(1, min(100, $perPage));
+
+        return $this->taskRepository->all($filters, $validPerPage);
     }
 
     public function getTaskById(int $id): ?Task
