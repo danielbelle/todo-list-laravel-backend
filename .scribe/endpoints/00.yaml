@@ -1,17 +1,27 @@
-name: Endpoints
-description: ''
+name: Tasks
+description: |-
+
+  API for managing tasks
+
+  This API provides complete CRUD operations for task management with filtering,
+  pagination, and status updates. No authentication is required.
 endpoints:
   -
     httpMethods:
       - GET
     uri: api/v1/tasks
     metadata:
-      groupName: Endpoints
-      groupDescription: ''
+      groupName: Tasks
+      groupDescription: |-
+
+        API for managing tasks
+
+        This API provides complete CRUD operations for task management with filtering,
+        pagination, and status updates. No authentication is required.
       subgroup: ''
       subgroupDescription: ''
-      title: ''
-      description: ''
+      title: 'List all tasks'
+      description: 'Get a paginated list of tasks with optional filtering capabilities.'
       authenticated: false
       deprecated: false
       custom: []
@@ -20,20 +30,100 @@ endpoints:
       Accept: application/json
     urlParameters: []
     cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
+    queryParameters:
+      page:
+        name: page
+        description: 'Page number for pagination.'
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      per_page:
+        name: per_page
+        description: 'Number of items per page (1-100).'
+        required: false
+        example: 15
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      completed:
+        name: completed
+        description: 'Filter by completion status.'
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      search:
+        name: search
+        description: 'Search term to filter tasks by title.'
+        required: false
+        example: important
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanQueryParameters:
+      page: 1
+      per_page: 15
+      completed: true
+      search: important
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
     responses:
       -
         status: 200
-        content: '{"success":true,"data":[{"id":1,"title":"Aliquam quae maiores optio doloremque unde doloremque.","completed":true,"status":"completed","created_at":"2025-09-19T16:12:00.000000Z","updated_at":"2025-09-19T18:46:45.000000Z","deleted_at":null,"is_deleted":false},{"id":2,"title":"In ad ut provident numquam.","completed":true,"status":"completed","created_at":"2025-09-19T16:12:00.000000Z","updated_at":"2025-09-19T18:48:27.000000Z","deleted_at":null,"is_deleted":false},{"id":3,"title":"Dolores iure sunt non ut ducimus perspiciatis.","completed":true,"status":"completed","created_at":"2025-09-19T16:12:00.000000Z","updated_at":"2025-09-19T16:12:00.000000Z","deleted_at":null,"is_deleted":false},{"id":4,"title":"Omnis tempora molestias id saepe architecto vel rem.","completed":true,"status":"completed","created_at":"2025-09-19T16:12:00.000000Z","updated_at":"2025-09-19T16:12:00.000000Z","deleted_at":null,"is_deleted":false},{"id":5,"title":"Nobis aut magnam quidem sed voluptas facere itaque.","completed":true,"status":"completed","created_at":"2025-09-19T16:12:00.000000Z","updated_at":"2025-09-19T18:49:13.000000Z","deleted_at":null,"is_deleted":false},{"id":6,"title":"Delectus molestias autem nesciunt.","completed":false,"status":"pending","created_at":"2025-09-19T16:12:00.000000Z","updated_at":"2025-09-19T16:12:00.000000Z","deleted_at":null,"is_deleted":false},{"id":7,"title":"Laborum iste fuga eligendi doloribus.","completed":true,"status":"completed","created_at":"2025-09-19T16:12:00.000000Z","updated_at":"2025-09-19T16:12:00.000000Z","deleted_at":null,"is_deleted":false},{"id":8,"title":"Fugit sint qui aliquam.","completed":false,"status":"pending","created_at":"2025-09-19T16:12:00.000000Z","updated_at":"2025-09-19T16:12:00.000000Z","deleted_at":null,"is_deleted":false},{"id":9,"title":"Eius sapiente doloremque suscipit eum sapiente commodi animi.","completed":true,"status":"completed","created_at":"2025-09-19T16:12:00.000000Z","updated_at":"2025-09-19T19:50:08.000000Z","deleted_at":null,"is_deleted":false},{"id":10,"title":"Eum iste eum est molestias omnis totam culpa molestiae.","completed":true,"status":"completed","created_at":"2025-09-19T16:12:00.000000Z","updated_at":"2025-09-19T19:50:45.000000Z","deleted_at":null,"is_deleted":false},{"id":11,"title":"Aut est esse dolorum inventore placeat veritatis.","completed":false,"status":"pending","created_at":"2025-09-19T16:12:00.000000Z","updated_at":"2025-09-19T16:12:00.000000Z","deleted_at":null,"is_deleted":false},{"id":12,"title":"Accusamus et quo omnis est corrupti et veniam.","completed":false,"status":"pending","created_at":"2025-09-19T16:12:00.000000Z","updated_at":"2025-09-19T16:12:00.000000Z","deleted_at":null,"is_deleted":false},{"id":13,"title":"Consequuntur aspernatur dolores accusamus nostrum laborum debitis id eligendi.","completed":true,"status":"completed","created_at":"2025-09-19T16:12:00.000000Z","updated_at":"2025-09-19T16:12:00.000000Z","deleted_at":null,"is_deleted":false},{"id":14,"title":"Natus dolores ullam voluptas omnis libero ut atque.","completed":true,"status":"completed","created_at":"2025-09-19T16:12:00.000000Z","updated_at":"2025-09-19T16:12:00.000000Z","deleted_at":null,"is_deleted":false},{"id":15,"title":"Voluptates corporis soluta error expedita omnis totam.","completed":false,"status":"pending","created_at":"2025-09-19T16:12:00.000000Z","updated_at":"2025-09-19T16:12:00.000000Z","deleted_at":null,"is_deleted":false}],"meta":{"total":42,"per_page":15,"current_page":1,"last_page":3,"from":1,"to":15},"links":{"first":"http:\/\/localhost\/api\/v1\/tasks?page=1","last":"http:\/\/localhost\/api\/v1\/tasks?page=3","prev":null,"next":"http:\/\/localhost\/api\/v1\/tasks?page=2"}}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: '*'
-        description: null
+        content: |-
+          {
+            "success": true,
+            "data": [
+              {
+                "id": 1,
+                "title": "Complete project documentation",
+                "completed": true,
+                "status": "completed",
+                "created_at": "2025-09-21T10:00:00.000000Z",
+                "updated_at": "2025-09-21T10:30:00.000000Z",
+                "deleted_at": null,
+                "is_deleted": false
+              }
+            ],
+            "meta": {
+              "total": 25,
+              "per_page": 15,
+              "current_page": 1,
+              "last_page": 2,
+              "from": 1,
+              "to": 15
+            },
+            "links": {
+              "first": "http://localhost/api/v1/tasks?page=1",
+              "last": "http://localhost/api/v1/tasks?page=2",
+              "prev": null,
+              "next": "http://localhost/api/v1/tasks?page=2"
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 500
+        content: |-
+          {
+            "success": false,
+            "message": "Internal server error"
+          }
+        headers: []
+        description: ''
         custom: []
     responseFields: []
     auth: []
@@ -46,12 +136,17 @@ endpoints:
       - POST
     uri: api/v1/tasks
     metadata:
-      groupName: Endpoints
-      groupDescription: ''
+      groupName: Tasks
+      groupDescription: |-
+
+        API for managing tasks
+
+        This API provides complete CRUD operations for task management with filtering,
+        pagination, and status updates. No authentication is required.
       subgroup: ''
       subgroupDescription: ''
-      title: ''
-      description: ''
+      title: 'Create a new task'
+      description: 'Create a new task with the provided title.'
       authenticated: false
       deprecated: false
       custom: []
@@ -65,18 +160,63 @@ endpoints:
     bodyParameters:
       title:
         name: title
-        description: 'Must not be greater than 255 characters. Must be at least 3 characters.'
+        description: 'The title of the task. Must be at least 3 characters.'
         required: true
-        example: bngzmiyvdljnikhwaykcmyuwpwlvqwrsitcpscqldzsnrwtujwvlxjklqppwqbewtnnoqitpxn
+        example: 'Learn Laravel'
         type: string
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         custom: []
     cleanBodyParameters:
-      title: bngzmiyvdljnikhwaykcmyuwpwlvqwrsitcpscqldzsnrwtujwvlxjklqppwqbewtnnoqitpxn
+      title: 'Learn Laravel'
     fileParameters: []
-    responses: []
+    responses:
+      -
+        status: 201
+        content: |-
+          {
+            "success": true,
+            "data": {
+              "id": 1,
+              "title": "Learn Laravel",
+              "completed": false,
+              "status": "pending",
+              "created_at": "2025-09-21T10:00:00.000000Z",
+              "updated_at": "2025-09-21T10:00:00.000000Z",
+              "deleted_at": null,
+              "is_deleted": false
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 422
+        content: |-
+          {
+            "success": false,
+            "message": "Validation failed",
+            "errors": {
+              "title": [
+                "The title field is required.",
+                "The title must be at least 3 characters."
+              ]
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 500
+        content: |-
+          {
+            "success": false,
+            "message": "Could not create task"
+          }
+        headers: []
+        description: ''
+        custom: []
     responseFields: []
     auth: []
     controller: null
@@ -88,12 +228,17 @@ endpoints:
       - GET
     uri: 'api/v1/tasks/{id}'
     metadata:
-      groupName: Endpoints
-      groupDescription: ''
+      groupName: Tasks
+      groupDescription: |-
+
+        API for managing tasks
+
+        This API provides complete CRUD operations for task management with filtering,
+        pagination, and status updates. No authentication is required.
       subgroup: ''
       subgroupDescription: ''
-      title: ''
-      description: ''
+      title: 'Get a specific task'
+      description: 'Retrieve details of a single task by its ID.'
       authenticated: false
       deprecated: false
       custom: []
@@ -108,7 +253,7 @@ endpoints:
         example: 1
         type: integer
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         custom: []
     cleanUrlParameters:
@@ -121,12 +266,42 @@ endpoints:
     responses:
       -
         status: 200
-        content: '{"success":true,"data":{"id":1,"title":"Aliquam quae maiores optio doloremque unde doloremque.","completed":true,"status":"completed","created_at":"2025-09-19T16:12:00.000000Z","updated_at":"2025-09-19T18:46:45.000000Z","deleted_at":null,"is_deleted":false}}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: '*'
-        description: null
+        content: |-
+          {
+            "success": true,
+            "data": {
+              "id": 1,
+              "title": "Complete project documentation",
+              "completed": true,
+              "status": "completed",
+              "created_at": "2025-09-21T10:00:00.000000Z",
+              "updated_at": "2025-09-21T10:30:00.000000Z",
+              "deleted_at": null,
+              "is_deleted": false
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+            "success": false,
+            "message": "Task not found"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 500
+        content: |-
+          {
+            "success": false,
+            "message": "Internal server error"
+          }
+        headers: []
+        description: ''
         custom: []
     responseFields: []
     auth: []
@@ -139,12 +314,17 @@ endpoints:
       - PUT
     uri: 'api/v1/tasks/{id}'
     metadata:
-      groupName: Endpoints
-      groupDescription: ''
+      groupName: Tasks
+      groupDescription: |-
+
+        API for managing tasks
+
+        This API provides complete CRUD operations for task management with filtering,
+        pagination, and status updates. No authentication is required.
       subgroup: ''
       subgroupDescription: ''
-      title: ''
-      description: ''
+      title: 'Update a task'
+      description: "Update an existing task's title and/or completion status."
       authenticated: false
       deprecated: false
       custom: []
@@ -154,12 +334,12 @@ endpoints:
     urlParameters:
       id:
         name: id
-        description: 'The ID of the task.'
+        description: 'The ID of the task to update.'
         required: true
         example: 1
         type: integer
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         custom: []
     cleanUrlParameters:
@@ -169,29 +349,83 @@ endpoints:
     bodyParameters:
       title:
         name: title
-        description: 'Must not be greater than 255 characters. Must be at least 3 characters.'
-        required: true
-        example: bngzmiyvdljnikhwaykcmyuwpwlvqwrsitcpscqldzsnrwtujwvlxjklqppwqbewtnnoqitpxn
+        description: 'The new title of the task. Must be at least 3 characters.'
+        required: false
+        example: 'Updated task title'
         type: string
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         custom: []
       completed:
         name: completed
-        description: ''
+        description: 'The completion status of the task.'
         required: false
         example: true
         type: boolean
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         custom: []
     cleanBodyParameters:
-      title: bngzmiyvdljnikhwaykcmyuwpwlvqwrsitcpscqldzsnrwtujwvlxjklqppwqbewtnnoqitpxn
+      title: 'Updated task title'
       completed: true
     fileParameters: []
-    responses: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "success": true,
+            "data": {
+              "id": 1,
+              "title": "Updated task title",
+              "completed": true,
+              "status": "completed",
+              "created_at": "2025-09-21T10:00:00.000000Z",
+              "updated_at": "2025-09-21T10:35:00.000000Z",
+              "deleted_at": null,
+              "is_deleted": false
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+            "success": false,
+            "message": "Task not found"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 422
+        content: |-
+          {
+            "success": false,
+            "message": "Validation failed",
+            "errors": {
+              "title": [
+                "The title must be at least 3 characters."
+              ]
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 500
+        content: |-
+          {
+            "success": false,
+            "message": "Could not update task"
+          }
+        headers: []
+        description: ''
+        custom: []
     responseFields: []
     auth: []
     controller: null
@@ -203,12 +437,17 @@ endpoints:
       - DELETE
     uri: 'api/v1/tasks/{id}'
     metadata:
-      groupName: Endpoints
-      groupDescription: ''
+      groupName: Tasks
+      groupDescription: |-
+
+        API for managing tasks
+
+        This API provides complete CRUD operations for task management with filtering,
+        pagination, and status updates. No authentication is required.
       subgroup: ''
       subgroupDescription: ''
-      title: ''
-      description: ''
+      title: 'Delete a task'
+      description: 'Soft delete a task (can be restored if needed).'
       authenticated: false
       deprecated: false
       custom: []
@@ -218,12 +457,12 @@ endpoints:
     urlParameters:
       id:
         name: id
-        description: 'The ID of the task.'
+        description: 'The ID of the task to delete.'
         required: true
         example: 1
         type: integer
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         custom: []
     cleanUrlParameters:
@@ -233,7 +472,33 @@ endpoints:
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
-    responses: []
+    responses:
+      -
+        status: 204
+        content: '{}'
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+            "success": false,
+            "message": "Task not found"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 500
+        content: |-
+          {
+            "success": false,
+            "message": "Internal server error"
+          }
+        headers: []
+        description: ''
+        custom: []
     responseFields: []
     auth: []
     controller: null
@@ -245,12 +510,17 @@ endpoints:
       - PATCH
     uri: 'api/v1/tasks/{id}/complete'
     metadata:
-      groupName: Endpoints
-      groupDescription: ''
+      groupName: Tasks
+      groupDescription: |-
+
+        API for managing tasks
+
+        This API provides complete CRUD operations for task management with filtering,
+        pagination, and status updates. No authentication is required.
       subgroup: ''
       subgroupDescription: ''
-      title: ''
-      description: ''
+      title: 'Mark task as complete'
+      description: 'Mark a specific task as completed.'
       authenticated: false
       deprecated: false
       custom: []
@@ -260,12 +530,12 @@ endpoints:
     urlParameters:
       id:
         name: id
-        description: 'The ID of the task.'
+        description: 'The ID of the task to mark as complete.'
         required: true
         example: 1
         type: integer
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         custom: []
     cleanUrlParameters:
@@ -275,7 +545,56 @@ endpoints:
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
-    responses: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "success": true,
+            "data": {
+              "id": 1,
+              "title": "Complete project documentation",
+              "completed": true,
+              "status": "completed",
+              "created_at": "2025-09-21T10:00:00.000000Z",
+              "updated_at": "2025-09-21T10:40:00.000000Z",
+              "deleted_at": null,
+              "is_deleted": false
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+            "success": false,
+            "message": "Task not found"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 422
+        content: |-
+          {
+            "success": false,
+            "message": "Could not complete task"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 500
+        content: |-
+          {
+            "success": false,
+            "message": "Could not complete task"
+          }
+        headers: []
+        description: ''
+        custom: []
     responseFields: []
     auth: []
     controller: null
@@ -287,12 +606,17 @@ endpoints:
       - PATCH
     uri: 'api/v1/tasks/{id}/pending'
     metadata:
-      groupName: Endpoints
-      groupDescription: ''
+      groupName: Tasks
+      groupDescription: |-
+
+        API for managing tasks
+
+        This API provides complete CRUD operations for task management with filtering,
+        pagination, and status updates. No authentication is required.
       subgroup: ''
       subgroupDescription: ''
-      title: ''
-      description: ''
+      title: 'Mark task as pending'
+      description: 'Mark a specific task as pending (not completed).'
       authenticated: false
       deprecated: false
       custom: []
@@ -302,12 +626,12 @@ endpoints:
     urlParameters:
       id:
         name: id
-        description: 'The ID of the task.'
+        description: 'The ID of the task to mark as pending.'
         required: true
         example: 1
         type: integer
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         custom: []
     cleanUrlParameters:
@@ -317,7 +641,56 @@ endpoints:
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
-    responses: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "success": true,
+            "data": {
+              "id": 1,
+              "title": "Complete project documentation",
+              "completed": false,
+              "status": "pending",
+              "created_at": "2025-09-21T10:00:00.000000Z",
+              "updated_at": "2025-09-21T10:45:00.000000Z",
+              "deleted_at": null,
+              "is_deleted": false
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+            "success": false,
+            "message": "Task not found"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 422
+        content: |-
+          {
+            "success": false,
+            "message": "Could not mark task as pending"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 500
+        content: |-
+          {
+            "success": false,
+            "message": "Could not mark task as pending"
+          }
+        headers: []
+        description: ''
+        custom: []
     responseFields: []
     auth: []
     controller: null

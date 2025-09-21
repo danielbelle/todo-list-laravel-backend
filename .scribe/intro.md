@@ -6,8 +6,18 @@ RESTful API for task management
     <strong>Base URL</strong>: <code>http://localhost</code>
 </aside>
 
-    This documentation aims to provide all the information you need to work with our API.
+    Welcome to the TODO List API documentation!
+    This is a RESTful API built with Laravel for task management.
 
-    <aside>As you scroll, you'll see code examples for working with the API in different programming languages in the dark area to the right (or as part of the content on mobile).
-    You can switch the language used with the tabs at the top right (or from the nav menu at the top left on mobile).</aside>
+    This API provides complete CRUD operations.
+    The API is currently public and requires no authentication for easy testing and development.
+
+    Key Features:
+    - Task Management: Create, read, update, and delete tasks
+    - Smart Filtering: Filter by completion status and search by title
+    - Pagination: Built-in pagination with customizable page sizes
+    - Soft Delete: Tasks can be deleted and potentially restored
+    - RESTful Design: Clean, predictable endpoint structure
+    - JSON Responses: Consistent response format across all endpoints
+
 

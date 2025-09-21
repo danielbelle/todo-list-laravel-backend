@@ -14,12 +14,64 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @group Tasks
+ *
+ * API for managing tasks
+ *
+ * This API provides complete CRUD operations for task management with filtering,
+ * pagination, and status updates. No authentication is required.
+ */
 class TaskController extends BaseApiController
 {
     public function __construct(
         private TaskServiceInterface $taskService
     ) {}
 
+    /**
+     * List all tasks
+     *
+     * Get a paginated list of tasks with optional filtering capabilities.
+     *
+     * @queryParam page integer Page number for pagination. Example: 1
+     * @queryParam per_page integer Number of items per page (1-100). Example: 15
+     * @queryParam completed boolean Filter by completion status. Example: true
+     * @queryParam search string Search term to filter tasks by title. Example: important
+     *
+     * @response 200 {
+     *   "success": true,
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "title": "Complete project documentation",
+     *       "completed": true,
+     *       "status": "completed",
+     *       "created_at": "2025-09-21T10:00:00.000000Z",
+     *       "updated_at": "2025-09-21T10:30:00.000000Z",
+     *       "deleted_at": null,
+     *       "is_deleted": false
+     *     }
+     *   ],
+     *   "meta": {
+     *     "total": 25,
+     *     "per_page": 15,
+     *     "current_page": 1,
+     *     "last_page": 2,
+     *     "from": 1,
+     *     "to": 15
+     *   },
+     *   "links": {
+     *     "first": "http://localhost/api/v1/tasks?page=1",
+     *     "last": "http://localhost/api/v1/tasks?page=2",
+     *     "prev": null,
+     *     "next": "http://localhost/api/v1/tasks?page=2"
+     *   }
+     * }
+     * @response 500 {
+     *   "success": false,
+     *   "message": "Internal server error"
+     * }
+     */
     public function index(Request $request): JsonResponse
     {
         try {
@@ -34,6 +86,35 @@ class TaskController extends BaseApiController
         }
     }
 
+    /**
+     * Get a specific task
+     *
+     * Retrieve details of a single task by its ID.
+     *
+     * @urlParam id integer required The ID of the task. Example: 1
+     *
+     * @response 200 {
+     *   "success": true,
+     *   "data": {
+     *     "id": 1,
+     *     "title": "Complete project documentation",
+     *     "completed": true,
+     *     "status": "completed",
+     *     "created_at": "2025-09-21T10:00:00.000000Z",
+     *     "updated_at": "2025-09-21T10:30:00.000000Z",
+     *     "deleted_at": null,
+     *     "is_deleted": false
+     *   }
+     * }
+     * @response 404 {
+     *   "success": false,
+     *   "message": "Task not found"
+     * }
+     * @response 500 {
+     *   "success": false,
+     *   "message": "Internal server error"
+     * }
+     */
     public function show(int $id): JsonResponse
     {
         try {
@@ -49,6 +130,41 @@ class TaskController extends BaseApiController
         }
     }
 
+    /**
+     * Create a new task
+     *
+     * Create a new task with the provided title.
+     *
+     * @bodyParam title string required The title of the task. Must be at least 3 characters. Example: Learn Laravel
+     *
+     * @response 201 {
+     *   "success": true,
+     *   "data": {
+     *     "id": 1,
+     *     "title": "Learn Laravel",
+     *     "completed": false,
+     *     "status": "pending",
+     *     "created_at": "2025-09-21T10:00:00.000000Z",
+     *     "updated_at": "2025-09-21T10:00:00.000000Z",
+     *     "deleted_at": null,
+     *     "is_deleted": false
+     *   }
+     * }
+     * @response 422 {
+     *   "success": false,
+     *   "message": "Validation failed",
+     *   "errors": {
+     *     "title": [
+     *       "The title field is required.",
+     *       "The title must be at least 3 characters."
+     *     ]
+     *   }
+     * }
+     * @response 500 {
+     *   "success": false,
+     *   "message": "Could not create task"
+     * }
+     */
     public function store(TaskStoreRequest $request): JsonResponse
     {
         try {
@@ -65,6 +181,46 @@ class TaskController extends BaseApiController
         }
     }
 
+    /**
+     * Update a task
+     *
+     * Update an existing task's title and/or completion status.
+     *
+     * @urlParam id integer required The ID of the task to update. Example: 1
+     * @bodyParam title string The new title of the task. Must be at least 3 characters. Example: Updated task title
+     * @bodyParam completed boolean The completion status of the task. Example: true
+     *
+     * @response 200 {
+     *   "success": true,
+     *   "data": {
+     *     "id": 1,
+     *     "title": "Updated task title",
+     *     "completed": true,
+     *     "status": "completed",
+     *     "created_at": "2025-09-21T10:00:00.000000Z",
+     *     "updated_at": "2025-09-21T10:35:00.000000Z",
+     *     "deleted_at": null,
+     *     "is_deleted": false
+     *   }
+     * }
+     * @response 404 {
+     *   "success": false,
+     *   "message": "Task not found"
+     * }
+     * @response 422 {
+     *   "success": false,
+     *   "message": "Validation failed",
+     *   "errors": {
+     *     "title": [
+     *       "The title must be at least 3 characters."
+     *     ]
+     *   }
+     * }
+     * @response 500 {
+     *   "success": false,
+     *   "message": "Could not update task"
+     * }
+     */
     public function update(TaskUpdateRequest $request, int $id): JsonResponse
     {
         try {
@@ -83,6 +239,23 @@ class TaskController extends BaseApiController
         }
     }
 
+    /**
+     * Delete a task
+     *
+     * Soft delete a task (can be restored if needed).
+     *
+     * @urlParam id integer required The ID of the task to delete. Example: 1
+     *
+     * @response 204 {}
+     * @response 404 {
+     *   "success": false,
+     *   "message": "Task not found"
+     * }
+     * @response 500 {
+     *   "success": false,
+     *   "message": "Internal server error"
+     * }
+     */
     public function destroy(int $id): JsonResponse
     {
         try {
@@ -98,6 +271,39 @@ class TaskController extends BaseApiController
         }
     }
 
+    /**
+     * Mark task as complete
+     *
+     * Mark a specific task as completed.
+     *
+     * @urlParam id integer required The ID of the task to mark as complete. Example: 1
+     *
+     * @response 200 {
+     *   "success": true,
+     *   "data": {
+     *     "id": 1,
+     *     "title": "Complete project documentation",
+     *     "completed": true,
+     *     "status": "completed",
+     *     "created_at": "2025-09-21T10:00:00.000000Z",
+     *     "updated_at": "2025-09-21T10:40:00.000000Z",
+     *     "deleted_at": null,
+     *     "is_deleted": false
+     *   }
+     * }
+     * @response 404 {
+     *   "success": false,
+     *   "message": "Task not found"
+     * }
+     * @response 422 {
+     *   "success": false,
+     *   "message": "Could not complete task"
+     * }
+     * @response 500 {
+     *   "success": false,
+     *   "message": "Could not complete task"
+     * }
+     */
     public function complete(int $id): JsonResponse
     {
         try {
@@ -116,6 +322,39 @@ class TaskController extends BaseApiController
         }
     }
 
+    /**
+     * Mark task as pending
+     *
+     * Mark a specific task as pending (not completed).
+     *
+     * @urlParam id integer required The ID of the task to mark as pending. Example: 1
+     *
+     * @response 200 {
+     *   "success": true,
+     *   "data": {
+     *     "id": 1,
+     *     "title": "Complete project documentation",
+     *     "completed": false,
+     *     "status": "pending",
+     *     "created_at": "2025-09-21T10:00:00.000000Z",
+     *     "updated_at": "2025-09-21T10:45:00.000000Z",
+     *     "deleted_at": null,
+     *     "is_deleted": false
+     *   }
+     * }
+     * @response 404 {
+     *   "success": false,
+     *   "message": "Task not found"
+     * }
+     * @response 422 {
+     *   "success": false,
+     *   "message": "Could not mark task as pending"
+     * }
+     * @response 500 {
+     *   "success": false,
+     *   "message": "Could not mark task as pending"
+     * }
+     */
     public function pending(int $id): JsonResponse
     {
         try {

@@ -16,10 +16,20 @@ return [
 
     // Text to place in the "Introduction" section, right after the `description`. Markdown and HTML are supported.
     'intro_text' => <<<INTRO
-        This documentation aims to provide all the information you need to work with our API.
+        Welcome to the TODO List API documentation!
+        This is a RESTful API built with Laravel for task management.
 
-        <aside>As you scroll, you'll see code examples for working with the API in different programming languages in the dark area to the right (or as part of the content on mobile).
-        You can switch the language used with the tabs at the top right (or from the nav menu at the top left on mobile).</aside>
+        This API provides complete CRUD operations.
+        The API is currently public and requires no authentication for easy testing and development.
+
+        Key Features:
+        - Task Management: Create, read, update, and delete tasks
+        - Smart Filtering: Filter by completion status and search by title
+        - Pagination: Built-in pagination with customizable page sizes
+        - Soft Delete: Tasks can be deleted and potentially restored
+        - RESTful Design: Clean, predictable endpoint structure
+        - JSON Responses: Consistent response format across all endpoints
+
     INTRO,
 
     // The base URL displayed in the docs.
@@ -27,24 +37,27 @@ return [
     'base_url' => config("app.url", 'http://localhost'),
 
     // Routes to include in the docs
+
     'routes' => [
         [
             'match' => [
-                // Match only routes whose paths match this pattern (use * as a wildcard to match any characters). Example: 'users/*'.
-                'prefixes' => ['api/*'],
-
-                // Match only routes whose domains match this pattern (use * as a wildcard to match any characters). Example: 'api.*'.
+                'prefixes' => ['api/v1/*'],
                 'domains' => ['*'],
             ],
-
-            // Include these routes even if they did not match the rules above.
             'include' => [
-                // 'users.index', 'POST /new', '/auth/*'
+                'api/v1/tasks*',
             ],
-
-            // Exclude these routes even if they matched the rules above.
-            'exclude' => [
-                // 'GET /health', 'admin.*'
+            'apply' => [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
+                ],
+                'response_calls' => [
+                    'methods' => ['GET', 'POST', 'PUT', 'PATCH'],
+                    'config' => [
+                        'app.env' => 'documentation',
+                    ],
+                ],
             ],
         ],
     ],
@@ -56,7 +69,7 @@ return [
     'type' => 'laravel',
 
     // See https://scribe.knuckles.wtf/laravel/reference/config#theme for supported options
-    'theme' => 'default',
+    'theme' => 'elements',
 
     'static' => [
         // HTML documentation, assets and Postman collection will be generated to this folder.
@@ -166,7 +179,7 @@ return [
 
     'groups' => [
         // Endpoints which don't have a @group will be placed in this default group.
-        'default' => 'Endpoints',
+        'default' => 'Tasks',
 
         // By default, Scribe will sort groups alphabetically, and endpoints in the order their routes are defined.
         // You can override this by listing the groups, subgroups and endpoints here in the order you want them.
