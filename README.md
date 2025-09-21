@@ -12,12 +12,56 @@ RESTful API for task management (TODO LIST) built with Laravel, following a laye
 
 Boilerplate Architecture:
 
--   **Models:** Domain entities
--   **Repositories:** Data access abstraction
--   **Services:** Business logic
--   **Controllers:** HTTP presentation layer
--   **Requests:** Input validation
--   **Resources:** Output transformation
+-   **Framework:** Laravel 12.x
+-   **Starter Kit Base:** [hdeawy/api-starter-kit](https://github.com/hdeawy/api-starter-kit)
+-   **PHP:** ^8.2
+-   **SQLite:** 3
+
+## 🗺️ API Request Flow & Folder Structure
+
+```text
+
+[Client Request]
+   |
+   v
+[routes/v1/api]
+   |
+   v
+[TaskController] <-> [TaskStoreRequest / TaskUpdateRequest]
+   |
+   v
+[TaskServiceInterface / TaskService]
+   |
+   v
+[TaskRepositoryInterface / TaskRepository]
+   |
+   v
+[Model / Database]
+   |
+   v
+[TaskCollection / TaskResource]
+   |
+   v
+[ApiResponse]
+   |
+   v
+[TaskController]
+   |
+   v
+[Client Response]
+```
+
+> **Legend:**
+
+-   **routes/**: API endpoints
+-   **Controllers/**: Request/response handling
+-   **Requests/**: Data validation
+-   **Services/Contracts/**: Service interfaces
+-   **Services/Concretes/**: Business logic
+-   **Repositories/Task/Contracts/**: Repository interfaces
+-   **Repositories/Task/Concretes/**: Data access implementation
+-   **Models/**: Database entities
+-   **Resources/**: Output formatting
 
 ### 2. **Architecture Decisions - Simplified Initial Phase**
 
@@ -34,41 +78,147 @@ Boilerplate Architecture:
 | `created_at` | Timestamp   | Creation date         |
 | `updated_at` | Timestamp   | Last update date      |
 
-### 3. **Planned Development Flow**
-
-#### **Phase 1: Initial Setup (Simplified)**
-
--   Migration to create `tasks` table without relationships
--   Basic `Task` model (without relationships)
--   Repository interface and simplified implementation
--   Basic service interface and implementation
-
-#### **Phase 2: Application Layer (Public)**
-
--   Request classes for simple validation
--   Resource for data transformation
--   Controller with public CRUD endpoints
--   Routes without authentication middleware
-
-#### **Phase 3: Testing (Basic)**
-
--   Basic unit and feature tests
--   Public endpoints documentation
-
-#### **Phase 4: User Implementation (Future)**
-
--   Add authentication system
--   Relationships with User
--   Protection middleware
--   Authorization and ownership validations
-
-### 4. **Why this approach?**
+### 3. **Planned Development**
 
 -   **MVP First:** Deliver value quickly with core functionality
 -   **SOLID:** Each class has a single responsibility
 -   **PSR-12:** Clean namespace structure and code
 -   **Testability:** Well-separated layers facilitate testing
 -   **Scalability:** Prepared to add authentication later
+
+## 🛠️ **Start Project**
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/danielbelle/todo-list-laravel-backend.git todoapi
+cd todoapi
+
+# 2. Install dependencies
+composer install
+
+# 3. Copy and configure environment file
+cp .env.example .env
+# Edit .env with sqlite configuration ready
+
+# 4. Generate application key
+php artisan key:generate
+
+# 5. Run migrations
+php artisan migrate
+
+# 6. Run seeders (populate database with sample data)
+php artisan db:seed
+
+# 7. Run the development server
+php artisan serve
+
+# 8. Scribe API documentation
+http://localhost/docs
+
+# 9. Run tests (unit and feature)
+php artisan test
+```
+
+## 📂 **Expected File Structure - Current Project**
+
+```text
+app/
+├── Exceptions
+│   └── Handler.php
+├── Http
+│   ├── Controllers
+│   │   ├── Api
+│   │   │   ├── BaseApiController.php
+│   │   │   └── V1
+│   │   │       └── TaskController.php
+│   │   └── Controller.php
+│   ├── Requests
+│   │   └── Api/V1
+│   │       ├── TaskStoreRequest.php
+│   │       └── TaskUpdateRequest.php
+│   └── Resources
+│       └── Api
+│           └── Task
+│               ├── TaskCollection.php
+│               └── TaskResource.php
+├── Models
+│   └── Task.php
+├── Providers
+│   ├── AppServiceProvider.php
+│   ├── RepositoryServiceProvider.php
+│   ├── RouteServiceProvider.php
+│   ├── ServiceClassProvider.php
+│   └── TelescopeServiceProvider.php
+├── Repositories
+│   └── Task
+│       ├── Concretes
+│       │   └── TaskRepository.php
+│       └── Contracts
+│           └── TaskRepositoryInterface.php
+├── Services
+│   ├── Base/Concretes
+│   │   └── BaseService.php
+│   ├── Base/Contracts
+│   │   └── BaseServiceInterface.php
+│   ├── Concretes
+│   │   └── TaskService.php
+│   └── Contracts
+│       └── TaskServiceInterface.php
+└── Traits
+    └── ApiResponse.php
+
+database/
+├── factories
+│   └── TaskFactory.php
+├── migrations
+│   └── 2025_09_19_130810_create_tasks_table.php
+└── seeders
+    ├── DatabaseSeeder.php
+    └── TaskSeeder.php
+
+
+routes/
+└── v1
+    └── api.php
+
+tests/
+├── Feature
+│   ├── Acceptance
+│   │   └── TaskAcceptanceTest.php
+│   ├── Concurrency
+│   │   └── TaskConcurrencyTest.php
+│   ├── EdgeCases
+│   │   ├── TaskEdgeCasesTest.php
+│   │   ├── TaskFilterEdgeCasesTest.php
+│   │   ├── TaskPaginationEdgeCasesTest.php
+│   │   ├── TaskResponseStructureTest.php
+│   │   └── TaskSoftDeleteEdgeCasesTest.php
+│   ├── EndToEnd
+│   │   └── TaskWorkflowTest.php
+│   ├── Http
+│   │   └── Controllers
+│   │       └── Api
+│   │           └── V1
+│   │               └── TaskControllerTest.php
+│   ├── Performance
+│   │   └── TaskPerformanceTest.php
+│   ├── Requests
+│   │   ├── TaskStoreRequestTest.php
+│   │   └── TaskUpdateRequestTest.php
+│   ├── Resources
+│   │   └── TaskResourceTest.php
+│   └── Smoke
+│       └── ApiSmokeTest.php
+
+├── Unit
+│   ├── Repositories
+│   │   └── Task
+│   │       └── TaskRepositoryTest.php
+│   └── Services
+│       └── TaskServiceTest.php
+├── Pest.php
+└── TestCase.php
+```
 
 ## 📋 Sprint Structure
 
@@ -265,171 +415,6 @@ Implement user system and authentication in the existing API.
 -   API fully protected and functional
 
 ---
-
-<!--
-## 🚀 **Definition of Ready**
-
-For each backlog item, check:
-
--   [ ] Requirements clearly defined
--   [ ] Acceptance criteria specified
--   [ ] Dependencies identified
--   [ ] Effort estimation defined
-
-## ✅ **Definition of Done**
-
-To consider a task complete:
-
--   [ ] Code implemented following PSR-12
--   [ ] Unit and integration tests passing
--   [ ] Code review approved
--   [ ] Documentation updated
--   [ ] Test environment deployment completed
--   [ ] Performance validated
-        -->
-
-## 🛠️ **Useful Commands**
-
-```bash
-# Run tests
-php artisan test
-
-# Check code style
-composer pint
-
-# Static analysis
-composer stan
-
-# Generate migrations
-php artisan make:migration create_tasks_table
-
-# Run migrations
-php artisan migrate
-
-# Run seeders
-php artisan db:seed
-
-# View soft deleted records (via tinker)
-php artisan tinker
->>> App\Models\Task::onlyTrashed()->get()
-```
-
-## 📂 **Expected File Structure - Current Project**
-
-```text
-app/
-├── Exceptions
-│   └── Handler.php
-├── Http
-│   ├── Controllers
-│   │   ├── Api
-│   │   │   ├── BaseApiController.php
-│   │   │   └── V1
-│   │   │       ├── AuthController.php
-│   │   │       ├── TaskController.php
-│   │   │       └── UserController.php
-│   │   └── Controller.php
-│   ├── Requests
-│   │   └── Api/V1
-│   │       ├── Auth
-│   │       │   ├── LoginRequest.php
-│   │       │   └── RegisterRequest.php
-│   │       ├── TaskStoreRequest.php
-│   │       ├── TaskUpdateRequest.php
-│   │       ├── UserStoreRequest.php
-│   │       └── UserUpdateRequest.php
-│   └── Resources
-│       └── Api
-│           ├── Task
-│           │   ├── TaskCollection.php
-│           │   └── TaskResource.php
-│           └── User
-│               └── UserResource.php
-├── Models
-│   ├── Task.php
-│   └── User.php
-├── Providers
-│   ├── AppServiceProvider.php
-│   ├── RepositoryServiceProvider.php
-│   ├── RouteServiceProvider.php
-│   ├── ServiceClassProvider.php
-│   └── TelescopeServiceProvider.php
-├── Repositories
-│   ├── Base/Concretes
-│   │   ├── BaseRepository.php
-│   │   └── QueryableRepository.php
-│   ├── Base/Contracts
-│   │   ├── BaseRepositoryInterface.php
-│   │   └── QueryableRepositoryInterface.php
-│   ├── Task
-│   │   ├── Concretes
-│   │   │   └── TaskRepository.php
-│   │   └── Contracts
-│   │       └── TaskRepositoryInterface.php
-│   └── User
-│       ├── Concretes
-│       │   └── UserRepository.php
-│       └── Contracts
-│           └── UserRepositoryInterface.php
-├── Services
-│   ├── Base/Concretes
-│   │   └── BaseService.php
-│   ├── Base/Contracts
-│   │   └── BaseServiceInterface.php
-│   ├── Concretes
-│   │   ├── AuthService.php
-│   │   ├── TaskService.php
-│   │   └── UserService.php
-│   └── Contracts
-│       ├── AuthServiceInterface.php
-│       ├── TaskServiceInterface.php
-│       └── UserServiceInterface.php
-└── Traits
-    └── ApiResponse.php
-
-database/
-├── factories
-│   ├── TaskFactory.php
-│   └── UserFactory.php
-├── migrations
-│   ├── 0001_01_01_000000_create_users_table.php
-│   ├── 0001_01_01_000001_create_cache_table.php
-│   ├── 0001_01_01_000002_create_jobs_table.php
-│   ├── 2025_03_23_160911_add_password_reset_fields_to_users_table.php
-│   ├── 2025_04_22_175326_create_telescope_entries_table.php
-│   └── 2025_09_19_130810_create_tasks_table.php
-└── seeders
-    ├── DatabaseSeeder.php
-    ├── TaskSeeder.php
-    └── TestUsersSeeder.php
-
-routes/
-└── v1
-    └── api.php
-
-tests/
-├── Feature
-│   ├── Http
-│   │   └── Controllers
-│   │       ├── AuthControllerTest.php
-│   │       └── UserControllerTest.php
-│   └── Utils
-│       └── UserTestUtils.php
-├── Unit
-│   └── Services
-│       └── UserServiceTest.php
-├── Pest.php
-└── TestCase.php
-```
-
-<!--## 📈 **Success Metrics - Initial Phase**
-
--   **Code Coverage:** Minimum 70% (initial phase)
--   **Response Time:** < 200ms for basic endpoints
--   **Uptime:** 99.9%
--   **PSR-12 Compliance:** 100%
--   **Zero Security Vulnerabilities:** Validated by tools
--->
 
 ## 🔄 **Evolution Roadmap**
 

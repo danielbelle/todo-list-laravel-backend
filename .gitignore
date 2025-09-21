@@ -21,8 +21,3 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
-
-README-copy.md
-testtasks.sh
-log_test_tasks.txt
-tests.txt
