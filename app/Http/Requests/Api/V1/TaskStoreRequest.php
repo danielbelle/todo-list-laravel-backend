@@ -25,16 +25,10 @@ class TaskStoreRequest extends FormRequest
             return null;
         }
 
-        // Remove tags HTML/XML
+        $value = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', '$1', $value);
         $value = strip_tags($value);
-
-        // Remove caracteres de controle
         $value = preg_replace('/[\x00-\x1F\x7F]/', '', $value);
-
-        // Trim espaços extras
         $value = trim($value);
-
-        // Remove múltiplos espaços
         $value = preg_replace('/\s+/', ' ', $value);
 
         return $value;
