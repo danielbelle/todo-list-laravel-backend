@@ -5,12 +5,12 @@ namespace Tests\Feature\Http\Controllers\Api\V1;
 use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
-/**
- * @group feature
- * @group controllers
- * @group taskedgecases
- */
+#[Group('feature')]
+#[Group('http')]
+#[Group('controllers')]
+#[Group('edge_cases')]
 
 
 class TaskEdgeCasesTest extends TestCase

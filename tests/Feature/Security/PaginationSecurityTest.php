@@ -3,14 +3,12 @@
 namespace Tests\Feature\Security;
 
 use Tests\TestCase;
-
-/**
- * @group feature
- * @group security
- * @group paginationsecurity
- */
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Group;
+
+#[Group('feature')]
+#[Group('security')]
+#[Group('paginationsecurity')]
 
 class PaginationSecurityTest extends TestCase
 {

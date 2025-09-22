@@ -5,12 +5,10 @@ namespace Tests\Feature\Concurrency;
 use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
-/**
- * @group feature
- * @group concurrency
- * @group taskconcurrency
- */
+#[Group('feature')]
+#[Group('concurrency')]
 
 
 class TaskConcurrencyTest extends TestCase

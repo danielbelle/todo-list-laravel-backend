@@ -6,13 +6,11 @@ use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
-/**
- * @group feature
- * @group requests
- * @group taskupdaterequest
- */
-
+#[Group('feature')]
+#[Group('http')]
+#[Group('requests')]
 
 class TaskUpdateRequestTest extends TestCase
 {

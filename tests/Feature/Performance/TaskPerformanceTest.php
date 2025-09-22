@@ -5,12 +5,11 @@ namespace Tests\Feature\Performance;
 use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
-/**
- * @group feature
- * @group performance
- * @group taskperformance
- */
+#[Group('feature')]
+#[Group('performance')]
+#[Group('taskperformancetest')]
 
 
 class TaskPerformanceTest extends TestCase

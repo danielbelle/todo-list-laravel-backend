@@ -7,14 +7,12 @@ use App\Repositories\Task\Contracts\TaskRepositoryInterface;
 use App\Services\Concretes\TaskService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Tests\TestCase;
-
-/**
- * @group unit
- * @group services
- * @group taskservice
- */
-
 use Mockery;
+use PHPUnit\Framework\Attributes\Group;
+
+#[Group('unit')]
+#[Group('services')]
+#[Group('taskservice')]
 
 class TaskServiceTest extends TestCase
 {

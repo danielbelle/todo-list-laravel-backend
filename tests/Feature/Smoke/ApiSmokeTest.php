@@ -5,10 +5,10 @@ namespace Tests\Feature\Smoke;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\Task;
+use PHPUnit\Framework\Attributes\Group;
 
-/**
- * @group feature
- */
+#[Group('feature')]
+#[Group('smoke')]
 
 class ApiSmokeTest extends TestCase
 {

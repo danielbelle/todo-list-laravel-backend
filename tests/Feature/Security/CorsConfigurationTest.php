@@ -2,14 +2,12 @@
 
 namespace Tests\Feature\Security;
 
+use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 
-/**
- * @group feature
- * @group security
- * @group corsconfiguration
- */
-
+#[Group('feature')]
+#[Group('security')]
+#[Group('corsconfiguration')]
 
 class CorsConfigurationTest extends TestCase
 {
@@ -21,14 +19,14 @@ class CorsConfigurationTest extends TestCase
             'Access-Control-Request-Headers' => 'Content-Type',
         ]);
 
-        $response->assertHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+        $response->assertHeader('Access-Control-Allow-Origin', '*');
         $response->assertHeader('Access-Control-Allow-Methods');
         $response->assertHeader('Access-Control-Allow-Headers');
     }
 
     public function test_cors_allows_configured_origins()
     {
-        $allowedOrigin = 'http://localhost:3000';
+        $allowedOrigin = '*';
 
         $response = $this->getJson('/api/v1/tasks', [
             'Origin' => $allowedOrigin

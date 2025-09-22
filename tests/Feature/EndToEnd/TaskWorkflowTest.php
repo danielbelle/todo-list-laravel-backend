@@ -5,11 +5,11 @@ namespace Tests\Feature\EndToEnd;
 use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
-/**
- * @group feature
- * @group endtoend
- */
+#[Group('feature')]
+#[Group('endtoend')]
+#[Group('workflows')]
 
 class TaskWorkflowTest extends TestCase
 {

@@ -5,13 +5,11 @@ namespace Tests\Feature\Http\Controllers\Api\V1;
 use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
-/**
- * @group feature
- * @group controllers
- * @group taskcontroller
- */
-
+#[Group('feature')]
+#[Group('http')]
+#[Group('controllers')]
 
 class TaskControllerTest extends TestCase
 {

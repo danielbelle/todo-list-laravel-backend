@@ -5,12 +5,11 @@ namespace Tests\Feature\EdgeCases;
 use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
-/**
- * @group feature
- * @group edge-cases
- * @group taskpaginationedgecases
- */
+#[Group('feature')]
+#[Group('edge_cases')]
+#[Group('task_pagination_edge_cases')]
 
 
 class TaskPaginationEdgeCasesTest extends TestCase

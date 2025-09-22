@@ -7,12 +7,11 @@ use App\Repositories\Task\Concretes\TaskRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
-/**
- * @group unit
- * @group repositories
- * @group taskrepository
- */
+#[Group('unit')]
+#[Group('repositories')]
+#[Group('taskrepository')]
 
 
 class TaskRepositoryTest extends TestCase

@@ -5,13 +5,10 @@ namespace Tests\Feature\Acceptance;
 use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
-/**
- * @group feature
- * @group acceptance
- * @group taskacceptance
- */
-
+#[Group('feature')]
+#[Group('acceptance')]
 
 class TaskAcceptanceTest extends TestCase
 {

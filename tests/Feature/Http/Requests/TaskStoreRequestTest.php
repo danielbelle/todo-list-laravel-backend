@@ -6,12 +6,11 @@ use App\Http\Requests\Api\V1\TaskStoreRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
-/**
- * @group feature
- * @group requests
- * @group taskstorerequest
- */
+#[Group('feature')]
+#[Group('http')]
+#[Group('requests')]
 
 
 class TaskStoreRequestTest extends TestCase

@@ -3,14 +3,12 @@
 namespace Tests\Feature\Security;
 
 use Tests\TestCase;
-
-/**
- * @group feature
- * @group security
- * @group errorhandling
- */
-
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use PHPUnit\Framework\Attributes\Group;
+
+#[Group('feature')]
+#[Group('security')]
+#[Group('errorhandling')]
 
 class ErrorHandlingTest extends TestCase
 {

@@ -3,15 +3,13 @@
 namespace Tests\Feature\Security;
 
 use Tests\TestCase;
-
-/**
- * @group feature
- * @group security
- * @group ratelimiting
- */
-
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Group;
+
+#[Group('feature')]
+#[Group('security')]
+#[Group('ratelimiting')]
 
 class RateLimitingTest extends TestCase
 {

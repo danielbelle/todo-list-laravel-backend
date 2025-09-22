@@ -6,12 +6,11 @@ use App\Http\Resources\Api\Task\TaskResource;
 use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
-/**
- * @group feature
- * @group resources
- * @group taskresource
- */
+#[Group('feature')]
+#[Group('http')]
+#[Group('resources')]
 
 
 class TaskResourceTest extends TestCase

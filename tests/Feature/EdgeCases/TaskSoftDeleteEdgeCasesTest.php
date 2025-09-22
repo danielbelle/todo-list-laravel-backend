@@ -6,12 +6,12 @@ use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
-/**
- * @group feature
- * @group edge-cases
- * @group tasksoftdeleteedgecases
- */
+#[Group('feature')]
+#[Group('edge_cases')]
+#[Group('soft_delete')]
+
 
 
 class TaskSoftDeleteTest extends TestCase
