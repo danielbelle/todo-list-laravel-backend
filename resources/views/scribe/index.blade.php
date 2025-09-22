@@ -149,9 +149,7 @@ Key Features:
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/v1/tasks" \
-    --header "Content-Type: application/json" \
-    --header "Accept: application/json"</code></pre></div>
+    --get "http://localhost/api/v1/tasks"</code></pre></div>
 
 
 <div class="javascript-example">
@@ -159,14 +157,8 @@ Key Features:
     "http://localhost/api/v1/tasks"
 );
 
-const headers = {
-    "Content-Type": "application/json",
-    "Accept": "application/json",
-};
-
 fetch(url, {
     method: "GET",
-    headers,
 }).then(response =&gt; response.json());</code></pre></div>
 
 </span>
@@ -192,10 +184,10 @@ access-control-allow-origin: *
         {
             &quot;id&quot;: 3,
             &quot;title&quot;: &quot;Possimus occaecati aut illum.&quot;,
-            &quot;completed&quot;: false,
-            &quot;status&quot;: &quot;pending&quot;,
+            &quot;completed&quot;: true,
+            &quot;status&quot;: &quot;completed&quot;,
             &quot;created_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
-            &quot;updated_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2025-09-22T08:09:47.000000Z&quot;,
             &quot;deleted_at&quot;: null,
             &quot;is_deleted&quot;: false
         },
@@ -403,30 +395,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <small class="badge badge-green">GET</small>
             <b><code>api/v1/tasks</code></b>
         </p>
-                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
-                                <div style="padding-left: 28px; clear: unset;">
-                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
-&nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="Content-Type"                data-endpoint="GETapi-v1-tasks"
-               value="application/json"
-               data-component="header">
-    <br>
-<p>Example: <code>application/json</code></p>
-            </div>
-                                <div style="padding-left: 28px; clear: unset;">
-                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
-&nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="Accept"                data-endpoint="GETapi-v1-tasks"
-               value="application/json"
-               data-component="header">
-    <br>
-<p>Example: <code>application/json</code></p>
-            </div>
-                        </form>
+                    </form>
 
                     <h2 id="tasks-GETapi-v1-tasks--id-">GET api/v1/tasks/{id}</h2>
 
@@ -441,9 +410,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/v1/tasks/3" \
-    --header "Content-Type: application/json" \
-    --header "Accept: application/json"</code></pre></div>
+    --get "http://localhost/api/v1/tasks/3"</code></pre></div>
 
 
 <div class="javascript-example">
@@ -451,14 +418,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     "http://localhost/api/v1/tasks/3"
 );
 
-const headers = {
-    "Content-Type": "application/json",
-    "Accept": "application/json",
-};
-
 fetch(url, {
     method: "GET",
-    headers,
 }).then(response =&gt; response.json());</code></pre></div>
 
 </span>
@@ -483,10 +444,10 @@ access-control-allow-origin: *
     &quot;data&quot;: {
         &quot;id&quot;: 3,
         &quot;title&quot;: &quot;Possimus occaecati aut illum.&quot;,
-        &quot;completed&quot;: false,
-        &quot;status&quot;: &quot;pending&quot;,
+        &quot;completed&quot;: true,
+        &quot;status&quot;: &quot;completed&quot;,
         &quot;created_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-09-22T08:09:47.000000Z&quot;,
         &quot;deleted_at&quot;: null,
         &quot;is_deleted&quot;: false
     }
@@ -539,30 +500,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <small class="badge badge-green">GET</small>
             <b><code>api/v1/tasks/{id}</code></b>
         </p>
-                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
-                                <div style="padding-left: 28px; clear: unset;">
-                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
-&nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="Content-Type"                data-endpoint="GETapi-v1-tasks--id-"
-               value="application/json"
-               data-component="header">
-    <br>
-<p>Example: <code>application/json</code></p>
-            </div>
-                                <div style="padding-left: 28px; clear: unset;">
-                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
-&nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="Accept"                data-endpoint="GETapi-v1-tasks--id-"
-               value="application/json"
-               data-component="header">
-    <br>
-<p>Example: <code>application/json</code></p>
-            </div>
-                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>id</code></b>&nbsp;&nbsp;
 <small>integer</small>&nbsp;
@@ -591,7 +529,6 @@ You can check the Dev Tools console for debugging information.</code></pre>
     <pre><code class="language-bash">curl --request POST \
     "http://localhost/api/v1/tasks" \
     --header "Content-Type: application/json" \
-    --header "Accept: application/json" \
     --data "{
     \"title\": \"bngzmiyvdljnikhwaykcmyuwpwlvqwrsitcpscqldzsnrwtujwvlxjklqppwqbewtnnoqitpxn\"
 }"
@@ -680,17 +617,6 @@ You can check the Dev Tools console for debugging information.</code></pre>
     <br>
 <p>Example: <code>application/json</code></p>
             </div>
-                                <div style="padding-left: 28px; clear: unset;">
-                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
-&nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="Accept"                data-endpoint="POSTapi-v1-tasks"
-               value="application/json"
-               data-component="header">
-    <br>
-<p>Example: <code>application/json</code></p>
-            </div>
                                 <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>title</code></b>&nbsp;&nbsp;
@@ -720,10 +646,9 @@ You can check the Dev Tools console for debugging information.</code></pre>
     <pre><code class="language-bash">curl --request PUT \
     "http://localhost/api/v1/tasks/3" \
     --header "Content-Type: application/json" \
-    --header "Accept: application/json" \
     --data "{
     \"title\": \"bngzmiyvdljnikhwaykcmyuwpwlvqwrsitcpscqldzsnrwtujwvlxjklqppwqbewtnnoqitpxn\",
-    \"completed\": true
+    \"completed\": false
 }"
 </code></pre></div>
 
@@ -740,7 +665,7 @@ const headers = {
 
 let body = {
     "title": "bngzmiyvdljnikhwaykcmyuwpwlvqwrsitcpscqldzsnrwtujwvlxjklqppwqbewtnnoqitpxn",
-    "completed": true
+    "completed": false
 };
 
 fetch(url, {
@@ -811,17 +736,6 @@ You can check the Dev Tools console for debugging information.</code></pre>
     <br>
 <p>Example: <code>application/json</code></p>
             </div>
-                                <div style="padding-left: 28px; clear: unset;">
-                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
-&nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="Accept"                data-endpoint="PUTapi-v1-tasks--id-"
-               value="application/json"
-               data-component="header">
-    <br>
-<p>Example: <code>application/json</code></p>
-            </div>
                         <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>id</code></b>&nbsp;&nbsp;
@@ -865,7 +779,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>true</code></p>
+<p>Example: <code>false</code></p>
         </div>
         </form>
 
@@ -882,9 +796,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/api/v1/tasks/3" \
-    --header "Content-Type: application/json" \
-    --header "Accept: application/json"</code></pre></div>
+    "http://localhost/api/v1/tasks/3"</code></pre></div>
 
 
 <div class="javascript-example">
@@ -892,14 +804,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     "http://localhost/api/v1/tasks/3"
 );
 
-const headers = {
-    "Content-Type": "application/json",
-    "Accept": "application/json",
-};
-
 fetch(url, {
     method: "DELETE",
-    headers,
 }).then(response =&gt; response.json());</code></pre></div>
 
 </span>
@@ -952,30 +858,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <small class="badge badge-red">DELETE</small>
             <b><code>api/v1/tasks/{id}</code></b>
         </p>
-                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
-                                <div style="padding-left: 28px; clear: unset;">
-                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
-&nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="Content-Type"                data-endpoint="DELETEapi-v1-tasks--id-"
-               value="application/json"
-               data-component="header">
-    <br>
-<p>Example: <code>application/json</code></p>
-            </div>
-                                <div style="padding-left: 28px; clear: unset;">
-                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
-&nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="Accept"                data-endpoint="DELETEapi-v1-tasks--id-"
-               value="application/json"
-               data-component="header">
-    <br>
-<p>Example: <code>application/json</code></p>
-            </div>
-                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>id</code></b>&nbsp;&nbsp;
 <small>integer</small>&nbsp;
@@ -1002,9 +885,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://localhost/api/v1/tasks/3/complete" \
-    --header "Content-Type: application/json" \
-    --header "Accept: application/json"</code></pre></div>
+    "http://localhost/api/v1/tasks/3/complete"</code></pre></div>
 
 
 <div class="javascript-example">
@@ -1012,14 +893,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     "http://localhost/api/v1/tasks/3/complete"
 );
 
-const headers = {
-    "Content-Type": "application/json",
-    "Accept": "application/json",
-};
-
 fetch(url, {
     method: "PATCH",
-    headers,
 }).then(response =&gt; response.json());</code></pre></div>
 
 </span>
@@ -1072,30 +947,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <small class="badge badge-purple">PATCH</small>
             <b><code>api/v1/tasks/{id}/complete</code></b>
         </p>
-                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
-                                <div style="padding-left: 28px; clear: unset;">
-                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
-&nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="Content-Type"                data-endpoint="PATCHapi-v1-tasks--id--complete"
-               value="application/json"
-               data-component="header">
-    <br>
-<p>Example: <code>application/json</code></p>
-            </div>
-                                <div style="padding-left: 28px; clear: unset;">
-                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
-&nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="Accept"                data-endpoint="PATCHapi-v1-tasks--id--complete"
-               value="application/json"
-               data-component="header">
-    <br>
-<p>Example: <code>application/json</code></p>
-            </div>
-                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>id</code></b>&nbsp;&nbsp;
 <small>integer</small>&nbsp;
@@ -1122,9 +974,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://localhost/api/v1/tasks/3/pending" \
-    --header "Content-Type: application/json" \
-    --header "Accept: application/json"</code></pre></div>
+    "http://localhost/api/v1/tasks/3/pending"</code></pre></div>
 
 
 <div class="javascript-example">
@@ -1132,14 +982,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     "http://localhost/api/v1/tasks/3/pending"
 );
 
-const headers = {
-    "Content-Type": "application/json",
-    "Accept": "application/json",
-};
-
 fetch(url, {
     method: "PATCH",
-    headers,
 }).then(response =&gt; response.json());</code></pre></div>
 
 </span>
@@ -1192,30 +1036,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <small class="badge badge-purple">PATCH</small>
             <b><code>api/v1/tasks/{id}/pending</code></b>
         </p>
-                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
-                                <div style="padding-left: 28px; clear: unset;">
-                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
-&nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="Content-Type"                data-endpoint="PATCHapi-v1-tasks--id--pending"
-               value="application/json"
-               data-component="header">
-    <br>
-<p>Example: <code>application/json</code></p>
-            </div>
-                                <div style="padding-left: 28px; clear: unset;">
-                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
-&nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="Accept"                data-endpoint="PATCHapi-v1-tasks--id--pending"
-               value="application/json"
-               data-component="header">
-    <br>
-<p>Example: <code>application/json</code></p>
-            </div>
-                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>id</code></b>&nbsp;&nbsp;
 <small>integer</small>&nbsp;

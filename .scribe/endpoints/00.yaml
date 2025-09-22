@@ -15,9 +15,7 @@ endpoints:
       authenticated: false
       deprecated: false
       custom: []
-    headers:
-      Content-Type: application/json
-      Accept: application/json
+    headers: []
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -28,7 +26,7 @@ endpoints:
     responses:
       -
         status: 200
-        content: '{"success":true,"data":[{"id":3,"title":"Possimus occaecati aut illum.","completed":false,"status":"pending","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":4,"title":"Qui asperiores alias labore quo earum.","completed":false,"status":"pending","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":5,"title":"Amet inventore aut dolores fugit tempore.","completed":false,"status":"pending","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":6,"title":"Assumenda et ut rerum dicta consequuntur ut quos.","completed":false,"status":"pending","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":7,"title":"Dignissimos ratione consequatur esse veritatis porro velit.","completed":true,"status":"completed","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":8,"title":"Ipsa quo magnam aliquam.","completed":false,"status":"pending","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":9,"title":"Pariatur provident vitae minima placeat.","completed":false,"status":"pending","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":10,"title":"Voluptatem laboriosam sit qui.","completed":false,"status":"pending","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":11,"title":"Architecto at perspiciatis ut minima iusto corrupti.","completed":true,"status":"completed","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":12,"title":"Atque ratione iste deleniti cupiditate exercitationem rerum numquam.","completed":true,"status":"completed","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":13,"title":"Nostrum quis repellendus dolorum neque dolore sunt modi.","completed":true,"status":"completed","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":14,"title":"Ipsam aliquam sint eum repellat quidem aliquid odit.","completed":true,"status":"completed","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":15,"title":"Nesciunt ab tenetur fuga velit saepe natus.","completed":false,"status":"pending","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":16,"title":"Qui quos unde corporis a sapiente earum porro.","completed":false,"status":"pending","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":17,"title":"Eveniet et in occaecati et.","completed":false,"status":"pending","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false}],"meta":{"total":20,"per_page":15,"current_page":1,"last_page":2,"from":1,"to":15},"links":{"first":"http:\/\/localhost\/api\/v1\/tasks?page=1","last":"http:\/\/localhost\/api\/v1\/tasks?page=2","prev":null,"next":"http:\/\/localhost\/api\/v1\/tasks?page=2"}}'
+        content: '{"success":true,"data":[{"id":3,"title":"Possimus occaecati aut illum.","completed":true,"status":"completed","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T08:09:47.000000Z","deleted_at":null,"is_deleted":false},{"id":4,"title":"Qui asperiores alias labore quo earum.","completed":false,"status":"pending","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":5,"title":"Amet inventore aut dolores fugit tempore.","completed":false,"status":"pending","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":6,"title":"Assumenda et ut rerum dicta consequuntur ut quos.","completed":false,"status":"pending","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":7,"title":"Dignissimos ratione consequatur esse veritatis porro velit.","completed":true,"status":"completed","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":8,"title":"Ipsa quo magnam aliquam.","completed":false,"status":"pending","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":9,"title":"Pariatur provident vitae minima placeat.","completed":false,"status":"pending","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":10,"title":"Voluptatem laboriosam sit qui.","completed":false,"status":"pending","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":11,"title":"Architecto at perspiciatis ut minima iusto corrupti.","completed":true,"status":"completed","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":12,"title":"Atque ratione iste deleniti cupiditate exercitationem rerum numquam.","completed":true,"status":"completed","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":13,"title":"Nostrum quis repellendus dolorum neque dolore sunt modi.","completed":true,"status":"completed","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":14,"title":"Ipsam aliquam sint eum repellat quidem aliquid odit.","completed":true,"status":"completed","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":15,"title":"Nesciunt ab tenetur fuga velit saepe natus.","completed":false,"status":"pending","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":16,"title":"Qui quos unde corporis a sapiente earum porro.","completed":false,"status":"pending","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false},{"id":17,"title":"Eveniet et in occaecati et.","completed":false,"status":"pending","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false}],"meta":{"total":20,"per_page":15,"current_page":1,"last_page":2,"from":1,"to":15},"links":{"first":"http:\/\/localhost\/api\/v1\/tasks?page=1","last":"http:\/\/localhost\/api\/v1\/tasks?page=2","prev":null,"next":"http:\/\/localhost\/api\/v1\/tasks?page=2"}}'
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
@@ -57,9 +55,7 @@ endpoints:
       authenticated: false
       deprecated: false
       custom: []
-    headers:
-      Content-Type: application/json
-      Accept: application/json
+    headers: []
     urlParameters:
       id:
         name: id
@@ -81,7 +77,7 @@ endpoints:
     responses:
       -
         status: 200
-        content: '{"success":true,"data":{"id":3,"title":"Possimus occaecati aut illum.","completed":false,"status":"pending","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T07:14:38.000000Z","deleted_at":null,"is_deleted":false}}'
+        content: '{"success":true,"data":{"id":3,"title":"Possimus occaecati aut illum.","completed":true,"status":"completed","created_at":"2025-09-22T07:14:38.000000Z","updated_at":"2025-09-22T08:09:47.000000Z","deleted_at":null,"is_deleted":false}}'
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
@@ -112,7 +108,6 @@ endpoints:
       custom: []
     headers:
       Content-Type: application/json
-      Accept: application/json
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
@@ -154,7 +149,6 @@ endpoints:
       custom: []
     headers:
       Content-Type: application/json
-      Accept: application/json
     urlParameters:
       id:
         name: id
@@ -185,7 +179,7 @@ endpoints:
         name: completed
         description: ''
         required: false
-        example: true
+        example: false
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -193,7 +187,7 @@ endpoints:
         custom: []
     cleanBodyParameters:
       title: bngzmiyvdljnikhwaykcmyuwpwlvqwrsitcpscqldzsnrwtujwvlxjklqppwqbewtnnoqitpxn
-      completed: true
+      completed: false
     fileParameters: []
     responses: []
     responseFields: []
@@ -216,9 +210,7 @@ endpoints:
       authenticated: false
       deprecated: false
       custom: []
-    headers:
-      Content-Type: application/json
-      Accept: application/json
+    headers: []
     urlParameters:
       id:
         name: id
@@ -258,9 +250,7 @@ endpoints:
       authenticated: false
       deprecated: false
       custom: []
-    headers:
-      Content-Type: application/json
-      Accept: application/json
+    headers: []
     urlParameters:
       id:
         name: id
@@ -300,9 +290,7 @@ endpoints:
       authenticated: false
       deprecated: false
       custom: []
-    headers:
-      Content-Type: application/json
-      Accept: application/json
+    headers: []
     urlParameters:
       id:
         name: id

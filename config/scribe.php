@@ -218,13 +218,7 @@ return [
         'metadata' => [
             ...Defaults::METADATA_STRATEGIES,
         ],
-        'headers' => [
-            ...Defaults::HEADERS_STRATEGIES,
-            Strategies\StaticData::withSettings(data: [
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json',
-            ]),
-        ],
+        'headers' => [],
         'urlParameters' => [
             ...Defaults::URL_PARAMETERS_STRATEGIES,
         ],
