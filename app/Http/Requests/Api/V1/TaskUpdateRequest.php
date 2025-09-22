@@ -7,24 +7,56 @@ use Illuminate\Foundation\Http\FormRequest;
 class TaskUpdateRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
-     * (For simplicity, allow all requests; implement auth as needed)
+     * Prepare the data for validation.
      */
-    public function authorize(): bool
+    protected function prepareForValidation(): void
     {
-        return true;
+        if ($this->has('title')) {
+            $this->merge([
+                'title' => $this->sanitizeTitle($this->title)
+            ]);
+        }
+    }
+
+    /**
+     * Sanitize the title input.
+     */
+    private function sanitizeTitle(?string $value): ?string
+    {
+        if (is_null($value)) {
+            return null;
+        }
+
+        $value = strip_tags($value);
+        $value = preg_replace('/[\x00-\x1F\x7F]/', '', $value);
+        $value = trim($value);
+        $value = preg_replace('/\s+/', ' ', $value);
+
+        return $value;
     }
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'title' => 'required|string|max:255|min:3',
+            'title' => 'sometimes|required|string|max:255|min:3',
             'completed' => 'sometimes|boolean',
+        ];
+    }
+
+    /**
+     * Get custom messages for validator errors.
+     */
+    public function messages(): array
+    {
+        return [
+            'title.required' => 'The title is required.',
+            'title.max' => 'The title must not be greater than 255 characters.',
+            'title.string' => 'The title must be a string.',
+            'title.min' => 'The title must be at least 3 characters long.',
+            'completed.boolean' => 'The completed field must be true or false.',
         ];
     }
 }

@@ -7,17 +7,41 @@ use Illuminate\Foundation\Http\FormRequest;
 class TaskStoreRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request. (Public API - no auth needed)
+     * Prepare the data for validation.
      */
-    public function authorize(): bool
+    protected function prepareForValidation(): void
     {
-        return true;
+        $this->merge([
+            'title' => $this->sanitizeTitle($this->title)
+        ]);
+    }
+
+    /**
+     * Sanitize the title input.
+     */
+    private function sanitizeTitle(?string $value): ?string
+    {
+        if (is_null($value)) {
+            return null;
+        }
+
+        // Remove tags HTML/XML
+        $value = strip_tags($value);
+
+        // Remove caracteres de controle
+        $value = preg_replace('/[\x00-\x1F\x7F]/', '', $value);
+
+        // Trim espaços extras
+        $value = trim($value);
+
+        // Remove múltiplos espaços
+        $value = preg_replace('/\s+/', ' ', $value);
+
+        return $value;
     }
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -26,6 +50,9 @@ class TaskStoreRequest extends FormRequest
         ];
     }
 
+    /**
+     * Get custom messages for validator errors.
+     */
     public function messages(): array
     {
         return [
