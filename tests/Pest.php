@@ -12,12 +12,44 @@
 */
 
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 pest()->extend(Tests\TestCase::class)
     ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
     ->in('Feature', 'Unit');
+
+// Automatic groups based on folders
+uses()->group('feature')->in('Feature');
+uses()->group('unit')->in('Unit');
+
+// Security groups based on subfolders
+uses()->group('security')->in('Feature/Security');
+uses()->group('rate-limiting')->in('Feature/Security');
+uses()->group('cors')->in('Feature/Security');
+uses()->group('sanitization')->in('Feature/Security');
+uses()->group('error-handling')->in('Feature/Security');
+uses()->group('pagination-security')->in('Feature/Security');
+
+// Specific groups by test type
+uses()->group('acceptance')->in('Feature/Acceptance');
+uses()->group('concurrency')->in('Feature/Concurrency');
+uses()->group('edge-cases')->in('Feature/EdgeCases');
+uses()->group('end-to-end')->in('Feature/EndToEnd');
+uses()->group('performance')->in('Feature/Performance');
+uses()->group('requests')->in('Feature/Http/Requests');
+uses()->group('resources')->in('Feature/Http/Resources');
+uses()->group('smoke')->in('Feature/Smoke');
+
+// Unit test groups
+uses()->group('repositories')->in('Unit/Repositories');
+uses()->group('services')->in('Unit/Services');
+
+uses()->group('controllers')->in('Feature/Http/Controllers');
+
+// Common configurations
+uses(RefreshDatabase::class)->in('Feature');
 
 /*
 |--------------------------------------------------------------------------
@@ -62,5 +94,5 @@ function authedUser(?User $user = null): \Illuminate\Foundation\Testing\TestCase
 
 function apiRoute(string $route): string
 {
-    return '/api/v1/'.$route;
+    return '/api/v1/' . $route;
 }

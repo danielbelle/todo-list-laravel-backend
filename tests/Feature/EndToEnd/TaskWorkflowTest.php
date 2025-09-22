@@ -6,6 +6,11 @@ use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+/**
+ * @group feature
+ * @group endtoend
+ */
+
 class TaskWorkflowTest extends TestCase
 {
     use RefreshDatabase;

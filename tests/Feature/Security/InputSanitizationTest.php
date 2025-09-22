@@ -3,6 +3,13 @@
 namespace Tests\Feature\Security;
 
 use Tests\TestCase;
+
+/**
+ * @group feature
+ * @group security
+ * @group inputsanitization
+ */
+
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class InputSanitizationTest extends TestCase

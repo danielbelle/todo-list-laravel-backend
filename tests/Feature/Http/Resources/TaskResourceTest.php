@@ -7,6 +7,13 @@ use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+/**
+ * @group feature
+ * @group resources
+ * @group taskresource
+ */
+
+
 class TaskResourceTest extends TestCase
 {
     use RefreshDatabase;

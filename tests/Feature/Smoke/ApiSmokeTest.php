@@ -6,6 +6,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\Task;
 
+/**
+ * @group feature
+ */
+
 class ApiSmokeTest extends TestCase
 {
     use RefreshDatabase;

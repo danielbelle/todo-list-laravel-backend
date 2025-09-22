@@ -7,6 +7,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
+/**
+ * @group feature
+ * @group edge-cases
+ * @group tasksoftdeleteedgecases
+ */
+
+
 class TaskSoftDeleteTest extends TestCase
 {
     use RefreshDatabase;

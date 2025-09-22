@@ -7,6 +7,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 use Tests\TestCase;
 
+/**
+ * @group feature
+ * @group requests
+ * @group taskupdaterequest
+ */
+
+
 class TaskUpdateRequestTest extends TestCase
 {
     use RefreshDatabase;

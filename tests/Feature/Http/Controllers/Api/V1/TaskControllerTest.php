@@ -6,6 +6,13 @@ use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+/**
+ * @group feature
+ * @group controllers
+ * @group taskcontroller
+ */
+
+
 class TaskControllerTest extends TestCase
 {
     use RefreshDatabase;

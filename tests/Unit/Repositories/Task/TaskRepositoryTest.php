@@ -8,6 +8,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Tests\TestCase;
 
+/**
+ * @group unit
+ * @group repositories
+ * @group taskrepository
+ */
+
+
 class TaskRepositoryTest extends TestCase
 {
     use RefreshDatabase;

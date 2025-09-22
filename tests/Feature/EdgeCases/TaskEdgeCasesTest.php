@@ -6,6 +6,13 @@ use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+/**
+ * @group feature
+ * @group edge-cases
+ * @group taskedgecases
+ */
+
+
 class TaskEdgeCasesTest extends TestCase
 {
     use RefreshDatabase;

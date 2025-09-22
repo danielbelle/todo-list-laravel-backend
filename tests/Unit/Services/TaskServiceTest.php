@@ -7,6 +7,13 @@ use App\Repositories\Task\Contracts\TaskRepositoryInterface;
 use App\Services\Concretes\TaskService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Tests\TestCase;
+
+/**
+ * @group unit
+ * @group services
+ * @group taskservice
+ */
+
 use Mockery;
 
 class TaskServiceTest extends TestCase

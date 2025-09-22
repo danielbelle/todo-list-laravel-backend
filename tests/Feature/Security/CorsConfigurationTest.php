@@ -4,6 +4,13 @@ namespace Tests\Feature\Security;
 
 use Tests\TestCase;
 
+/**
+ * @group feature
+ * @group security
+ * @group corsconfiguration
+ */
+
+
 class CorsConfigurationTest extends TestCase
 {
     public function test_cors_headers_are_present()

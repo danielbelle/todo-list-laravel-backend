@@ -3,6 +3,13 @@
 namespace Tests\Feature\Security;
 
 use Tests\TestCase;
+
+/**
+ * @group feature
+ * @group security
+ * @group errorhandling
+ */
+
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ErrorHandlingTest extends TestCase

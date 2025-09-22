@@ -3,6 +3,13 @@
 namespace Tests\Feature\Security;
 
 use Tests\TestCase;
+
+/**
+ * @group feature
+ * @group security
+ * @group paginationsecurity
+ */
+
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class PaginationSecurityTest extends TestCase

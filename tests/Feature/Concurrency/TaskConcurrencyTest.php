@@ -6,6 +6,13 @@ use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+/**
+ * @group feature
+ * @group concurrency
+ * @group taskconcurrency
+ */
+
+
 class TaskConcurrencyTest extends TestCase
 {
     use RefreshDatabase;
