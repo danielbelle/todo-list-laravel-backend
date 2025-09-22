@@ -161,7 +161,7 @@ class TaskController extends BaseApiController
     {
         $task = $this->taskService->createTask($request->validated());
         if (!$task) {
-            return $this->errorResponse('Could not create task', Response::HTTP_UNPROCESSABLE_ENTITY);
+            return $this->validationErrorResponse('Validation failed');
         }
 
         return $this->createdResponse(new TaskResource($task));
