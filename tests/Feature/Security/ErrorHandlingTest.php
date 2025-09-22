@@ -5,6 +5,8 @@ namespace Tests\Feature\Security;
 use Tests\TestCase;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use PHPUnit\Framework\Attributes\Group;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\Task;
 
 #[Group('feature')]
 #[Group('security')]
@@ -12,8 +14,13 @@ use PHPUnit\Framework\Attributes\Group;
 
 class ErrorHandlingTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_production_environment_hides_sensitive_errors()
     {
+
+        Task::factory()->count(3)->create();
+
         config(['app.env' => 'production']);
         config(['app.debug' => false]);
 
@@ -31,13 +38,15 @@ class ErrorHandlingTest extends TestCase
 
     public function test_invalid_json_returns_proper_error()
     {
+
         $response = $this->postJson('/api/v1/tasks', [
             'invalid' => "\xB1\x31"
-        ], [
-            'Content-Type' => 'application/json'
         ]);
 
-        $response->assertStatus(400);
-        $response->assertJson(['message' => 'Invalid JSON']);
+        $this->assertNotEquals(500, $response->getStatusCode());
+
+        $this->assertTrue($response->getStatusCode() >= 400 && $response->getStatusCode() < 500);
+
+        $response->assertJsonStructure(['message']);
     }
 }

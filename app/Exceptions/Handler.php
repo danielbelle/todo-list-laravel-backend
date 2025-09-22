@@ -108,9 +108,11 @@ class Handler extends ExceptionHandler
             return 404;
         }
 
-        return method_exists($exception, 'getStatusCode')
-            ? $exception->getStatusCode()
-            : 500;
+        if ($exception instanceof \Illuminate\Database\QueryException) {
+            return app()->environment('production') ? 500 : 404;
+        }
+
+        return $exception->getCode() >= 100 && $exception->getCode() < 600 ? $exception->getCode() : 500;
     }
 
     /**

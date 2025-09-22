@@ -27,6 +27,7 @@ class TaskUpdateRequest extends FormRequest
             return null;
         }
 
+        $value = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', '$1', $value);
         $value = strip_tags($value);
         $value = preg_replace('/[\x00-\x1F\x7F]/', '', $value);
         $value = trim($value);

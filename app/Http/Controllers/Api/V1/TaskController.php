@@ -75,7 +75,9 @@ class TaskController extends BaseApiController
     public function index(Request $request): JsonResponse
     {
         $filters = $request->only(['completed', 'search']);
-        $perPage = $request->get('per_page', 15);
+        $perPage = $request->has('per_page')
+            ? (int)$request->get('per_page')
+            : 15;
         $tasks = $this->taskService->getAllTasks($filters, $perPage);
 
         return $this->successResponse(new TaskCollection($tasks));
