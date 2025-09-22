@@ -6,6 +6,7 @@ use App\Models\Task;
 use App\Repositories\Task\Contracts\TaskRepositoryInterface;
 use App\Services\Contracts\TaskServiceInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class TaskService implements TaskServiceInterface
 {
@@ -15,9 +16,7 @@ class TaskService implements TaskServiceInterface
 
     public function getAllTasks(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $validPerPage = max(1, min(100, $perPage));
-
-        return $this->taskRepository->all($filters, $validPerPage);
+        return $this->taskRepository->all($filters, $perPage);
     }
 
     public function getTaskById(int $id): ?Task
@@ -33,7 +32,7 @@ class TaskService implements TaskServiceInterface
     public function updateTask(int $id, array $data): Task
     {
         if (!$this->taskRepository->update($id, $data)) {
-            throw new \Exception('Task not found or could not be updated');
+            throw new ModelNotFoundException('Task not found');
         }
 
         return $this->getTaskById($id);
@@ -47,7 +46,7 @@ class TaskService implements TaskServiceInterface
     public function completeTask(int $id): Task
     {
         if (!$this->taskRepository->complete($id)) {
-            throw new \Exception('Task not found or could not be completed');
+            throw new ModelNotFoundException('Task not found');
         }
 
         return $this->getTaskById($id);
@@ -56,7 +55,7 @@ class TaskService implements TaskServiceInterface
     public function pendingTask(int $id): Task
     {
         if (!$this->taskRepository->pending($id)) {
-            throw new \Exception('Task not found or could not be marked as pending');
+            throw new ModelNotFoundException('Task not found');
         }
 
         return $this->getTaskById($id);

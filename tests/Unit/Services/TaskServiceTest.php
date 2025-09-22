@@ -94,7 +94,7 @@ class TaskServiceTest extends TestCase
     public function test_update_task_failure(): void
     {
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Task not found or could not be updated');
+        $this->expectExceptionMessage('Task not found');
 
         $this->repositoryMock->shouldReceive('update')
             ->with(1, ['title' => 'Updated'])
@@ -138,7 +138,7 @@ class TaskServiceTest extends TestCase
     public function test_complete_task_failure(): void
     {
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Task not found or could not be completed');
+        $this->expectExceptionMessage('Task not found');
 
         $this->repositoryMock->shouldReceive('complete')
             ->with(1)
@@ -170,7 +170,7 @@ class TaskServiceTest extends TestCase
     public function test_pending_task_failure(): void
     {
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Task not found or could not be marked as pending');
+        $this->expectExceptionMessage('Task not found');
 
         $this->repositoryMock->shouldReceive('pending')
             ->with(1)

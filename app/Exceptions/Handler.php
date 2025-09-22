@@ -2,21 +2,14 @@
 
 namespace App\Exceptions;
 
-use App\Traits\ApiResponse;
-use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
-use Symfony\Component\HttpFoundation\Response;
 use Throwable;
-use Tymon\JWTAuth\Exceptions\JWTException;
-use Tymon\JWTAuth\Exceptions\TokenExpiredException;
-use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class Handler extends ExceptionHandler
 {
-    use ApiResponse;
-
     /**
      * The list of the inputs that are never flashed to the session on validation exceptions.
      *
@@ -36,38 +29,128 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
 
-        $this->renderable(function (AuthenticationException $e, Request $request) {
-            if ($request->is('api/*')) {
-                return $this->errorResponse($e->getMessage(), Response::HTTP_UNAUTHORIZED);
-            }
-        });
+    /**
+     * Render an exception into an HTTP response.
+     *
+     * @param  Request  $request
+     * @param  Throwable  $e
+     * @return JsonResponse|Response
+     */
+    public function render($request, Throwable $e)
+    {
+        if ($request->is('api/*')) {
+            return $this->handleApiException($request, $e);
+        }
 
-        $this->renderable(function (TokenExpiredException $e, Request $request) {
-            if ($request->is('api/*')) {
-                return $this->errorResponse('Token has expired', Response::HTTP_UNAUTHORIZED);
-            }
-        });
+        return parent::render($request, $e);
+    }
 
-        $this->renderable(function (TokenInvalidException $e, Request $request) {
-            if ($request->is('api/*')) {
-                return $this->errorResponse('Token is invalid', Response::HTTP_UNAUTHORIZED);
-            }
-        });
+    /**
+     * Handle API exceptions.
+     */
+    private function handleApiException($request, Throwable $exception): JsonResponse
+    {
+        if (app()->environment('production')) {
+            \Log::error('API Exception', [
+                'url' => $request->fullUrl(),
+                'method' => $request->method(),
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'exception' => [
+                    'message' => $exception->getMessage(),
+                    'file' => $exception->getFile(),
+                    'line' => $exception->getLine(),
+                    'code' => $exception->getCode()
+                ]
+            ]);
+        }
 
-        $this->renderable(function (JWTException $e, Request $request) {
-            if ($request->is('api/*')) {
-                return $this->errorResponse('Token is not provided', Response::HTTP_UNAUTHORIZED);
-            }
-        });
+        $statusCode = $this->getStatusCode($exception);
 
-        $this->renderable(function (ValidationException $e, Request $request) {
-            if ($request->is('api/*')) {
-                return response()->json([
-                    'message' => 'The given data was invalid.',
-                    'errors' => $e->validator->errors(),
-                ], Response::HTTP_UNPROCESSABLE_ENTITY);
-            }
-        });
+        if (app()->environment('production')) {
+            return response()->json([
+                'success' => false,
+                'message' => $this->getProductionMessage($statusCode),
+                'error_code' => $this->getErrorCode($exception)
+            ], $statusCode);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => $exception->getMessage(),
+            'exception' => get_class($exception),
+            'file' => $exception->getFile(),
+            'line' => $exception->getLine(),
+            'trace' => $exception->getTrace()
+        ], $statusCode);
+    }
+
+    /**
+     * Get the HTTP status code.
+     */
+    private function getStatusCode(Throwable $exception): int
+    {
+        if ($exception instanceof \Illuminate\Validation\ValidationException) {
+            return 422;
+        }
+
+        if ($exception instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return 404;
+        }
+
+        if ($exception instanceof \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException) {
+            return 405;
+        }
+
+        if ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+            return 404;
+        }
+
+        return method_exists($exception, 'getStatusCode')
+            ? $exception->getStatusCode()
+            : 500;
+    }
+
+    /**
+     * Get user-friendly message for production.
+     */
+    private function getProductionMessage(int $statusCode): string
+    {
+        return match ($statusCode) {
+            400 => 'Bad request',
+            401 => 'Unauthorized',
+            403 => 'Forbidden',
+            404 => 'Resource not found',
+            405 => 'Method not allowed',
+            422 => 'Validation failed',
+            429 => 'Too many requests',
+            500 => 'Internal server error',
+            503 => 'Service unavailable',
+            default => 'An error occurred'
+        };
+    }
+
+    /**
+     * Get error code for tracking.
+     */
+    private function getErrorCode(Throwable $exception): ?string
+    {
+        if ($exception instanceof \Illuminate\Validation\ValidationException) {
+            return 'VALIDATION_ERROR';
+        }
+
+        if ($exception instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return 'RESOURCE_NOT_FOUND';
+        }
+
+        if ($exception instanceof \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException) {
+            return 'METHOD_NOT_ALLOWED';
+        }
+
+
+        $statusCode = $this->getStatusCode($exception);
+        return 'ERR_' . $statusCode;
     }
 }
