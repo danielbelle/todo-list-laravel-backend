@@ -156,10 +156,6 @@ app/
 │       └── Contracts
 │           └── TaskRepositoryInterface.php
 ├── Services
-│   ├── Base/Concretes
-│   │   └── BaseService.php
-│   ├── Base/Contracts
-│   │   └── BaseServiceInterface.php
 │   ├── Concretes
 │   │   └── TaskService.php
 │   └── Contracts
@@ -207,9 +203,14 @@ tests/
 │   │   └── TaskUpdateRequestTest.php
 │   ├── Resources
 │   │   └── TaskResourceTest.php
+│   ├── Requests
+│   │   ├── CorsConfigurationTest.php
+│   │   ├── ErrorHandlingTest.php
+│   │   ├── InputSanitizationTest.php
+│   │   ├── PaginationSecurityTest.php
+│   │   └── RateLimitingTest.php
 │   └── Smoke
 │       └── ApiSmokeTest.php
-
 ├── Unit
 │   ├── Repositories
 │   │   └── Task
