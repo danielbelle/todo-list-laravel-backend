@@ -192,18 +192,19 @@ tests/
 │   ├── EndToEnd
 │   │   └── TaskWorkflowTest.php
 │   ├── Http
-│   │   └── Controllers
-│   │       └── Api
-│   │           └── V1
-│   │               └── TaskControllerTest.php
+│   │   ├── Controllers
+│   │   │   └── Api
+│   │   │       └── V1
+│   │   │           ├── TaskControllerTest.php
+│   │   │           └── TaskEdgeCasesTest.php
+│   │   ├── Requests
+│   │   │   ├── TaskStoreRequestTest.php
+│   │   │   └── TaskUpdateRequestTest.php
+│   │   └── Resources
+│   │       └── TaskResourceTest.php
 │   ├── Performance
 │   │   └── TaskPerformanceTest.php
-│   ├── Requests
-│   │   ├── TaskStoreRequestTest.php
-│   │   └── TaskUpdateRequestTest.php
-│   ├── Resources
-│   │   └── TaskResourceTest.php
-│   ├── Requests
+│   ├── Security
 │   │   ├── CorsConfigurationTest.php
 │   │   ├── ErrorHandlingTest.php
 │   │   ├── InputSanitizationTest.php
