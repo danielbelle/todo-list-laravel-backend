@@ -4,435 +4,113 @@
     <meta charset="utf-8">
     <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>Laravel API Documentation</title>
+    <title>TODO List API API Documentation</title>
 
-    <link href="https://fonts.googleapis.com/css?family=PT+Sans&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="{{ asset("/vendor/scribe/css/theme-elements.style.css") }}" media="screen">
+    <link rel="stylesheet" href="{{ asset("/vendor/scribe/css/theme-default.style.css") }}" media="screen">
+    <link rel="stylesheet" href="{{ asset("/vendor/scribe/css/theme-default.print.css") }}" media="print">
 
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.10/lodash.min.js"></script>
 
     <link rel="stylesheet"
-          href="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/docco.min.css">
+          href="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/obsidian.min.css">
     <script src="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/highlight.min.js"></script>
-    <script>hljs.highlightAll();</script>
-    <script type="module">
-        import {CodeJar} from 'https://medv.io/codejar/codejar.js'
-        window.CodeJar = CodeJar;
-    </script>
 
-            <script>
-            var tryItOutBaseUrl = "http://localhost";
-            var useCsrf = Boolean();
-            var csrfUrl = "/sanctum/csrf-cookie";
-        </script>
-        <script src="{{ asset("/vendor/scribe/js/tryitout-5.3.0.js") }}"></script>
-        <style>
-            .code-editor, .response-content {
-                color: whitesmoke;
-                background-color: transparent;
-            }
-            /*
-             Problem: we want syntax highlighting for the Try It Out JSON body code editor
-             However, the Try It Out area uses a dark background, while request and response samples
-             (which are already highlighted) use a light background. HighlightJS can only use one theme per document.
-             Our options:
-             1. Change the bg of one. => No, it looks out of place on the page.
-             2. Use the same highlighting for both. => Nope, one would be unreadable.
-             3. Copy styles for a dark-bg h1js theme and prefix them for the CodeEditor, which is what we're doing.
-             Since it's only JSON, we only need a few styles anyway.
-             Styles taken from the Nord theme: https://github.com/highlightjs/highlight.js/blob/3997c9b430a568d5ad46d96693b90a74fc01ea7f/src/styles/nord.css#L2
-             */
-            .code-editor > .hljs-attr {
-                color: #8FBCBB;
-            }
-            .code-editor > .hljs-string {
-                color: #A3BE8C;
-            }
-            .code-editor > .hljs-number {
-                color: #B48EAD;
-            }
-            .code-editor > .hljs-literal{
-                color: #81A1C1;
-            }
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jets/0.14.1/jets.min.js"></script>
 
-        </style>
-
-        <script>
-            function tryItOut(btnElement) {
-                btnElement.disabled = true;
-
-                let endpointId = btnElement.dataset.endpoint;
-
-                let errorPanel = document.querySelector(`.tryItOut-error[data-endpoint=${endpointId}]`);
-                errorPanel.hidden = true;
-                let responsePanel = document.querySelector(`.tryItOut-response[data-endpoint=${endpointId}]`);
-                responsePanel.hidden = true;
-
-                let form = btnElement.form;
-                let { method, path, hasjsonbody: hasJsonBody} = form.dataset;
-                let body = {};
-                if (hasJsonBody === "1") {
-                    body = form.querySelector('.code-editor').textContent;
-                } else if (form.dataset.hasfiles === "1") {
-                    body = new FormData();
-                    form.querySelectorAll('input[data-component=body]')
-                        .forEach(el => {
-                            if (el.type === 'file') {
-                                if (el.files[0]) body.append(el.name, el.files[0])
-                            } else body.append(el.name, el.value);
-                        });
-                } else {
-                    form.querySelectorAll('input[data-component=body]').forEach(el => {
-                        _.set(body, el.name, el.value);
-                    });
-                }
-
-                const urlParameters = form.querySelectorAll('input[data-component=url]');
-                urlParameters.forEach(el => (path = path.replace(new RegExp(`\\{${el.name}\\??}`), el.value)));
-
-                const headers = Object.fromEntries(Array.from(form.querySelectorAll('input[data-component=header]'))
-                    .map(el => [el.name, (el.dataset.prefix || '') + el.value]));
-
-                const query = {}
-                form.querySelectorAll('input[data-component=query]').forEach(el => {
-                    _.set(query, el.name, el.value);
-                });
-
-                let preflightPromise = Promise.resolve();
-                if (window.useCsrf && window.csrfUrl) {
-                    preflightPromise = makeAPICall('GET', window.csrfUrl).then(() => {
-                        headers['X-XSRF-TOKEN'] = getCookie('XSRF-TOKEN');
-                    });
-                }
-
-                // content type has to be unset otherwise file upload won't work
-                if (form.dataset.hasfiles === "1") {
-                    delete headers['Content-Type'];
-                }
-
-                return preflightPromise.then(() => makeAPICall(method, path, body, query, headers, endpointId))
-                    .then(([responseStatus, statusText, responseContent, responseHeaders]) => {
-                        responsePanel.hidden = false;
-                        responsePanel.querySelector(`.response-status`).textContent = responseStatus + " " + statusText ;
-
-                        let contentEl = responsePanel.querySelector(`.response-content`);
-                        if (responseContent === '') {
-                            contentEl.textContent = contentEl.dataset.emptyResponseText;
-                            return;
-                        }
-
-                        // Prettify it if it's JSON
-                        let isJson = false;
-                        try {
-                            const jsonParsed = JSON.parse(responseContent);
-                            if (jsonParsed !== null) {
-                                isJson = true;
-                                responseContent = JSON.stringify(jsonParsed, null, 4);
-                            }
-                        } catch (e) {}
-
-                        // Replace HTML entities
-                        responseContent = responseContent.replace(/[<>&]/g, (i) => '&#' + i.charCodeAt(0) + ';');
-
-                        contentEl.innerHTML = responseContent;
-                        isJson && window.hljs.highlightElement(contentEl);
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        let errorMessage = err.message || err;
-                        errorPanel.hidden = false;
-                        errorPanel.querySelector(`.error-message`).textContent = errorMessage;
-                    })
-                    .finally(() => { btnElement.disabled = false } );
-            }
-
-            window.addEventListener('DOMContentLoaded', () => {
-                document.querySelectorAll('.tryItOut-btn').forEach(el => {
-                    el.addEventListener('click', () => tryItOut(el));
-                });
-            })
-        </script>
-    
-</head>
-
-<body>
+    <style id="language-style">
+        /* starts out as display none and is replaced with js later  */
+                    body .content .bash-example code { display: none; }
+                    body .content .javascript-example code { display: none; }
+            </style>
 
     <script>
-        function switchExampleLanguage(lang) {
-            document.querySelectorAll(`.example-request`).forEach(el => el.style.display = 'none');
-            document.querySelectorAll(`.example-request-${lang}`).forEach(el => el.style.display = 'initial');
-            document.querySelectorAll(`.example-request-lang-toggle`).forEach(el => el.value = lang);
-        }
+        var tryItOutBaseUrl = "http://localhost";
+        var useCsrf = Boolean();
+        var csrfUrl = "/sanctum/csrf-cookie";
     </script>
+    <script src="{{ asset("/vendor/scribe/js/tryitout-5.3.0.js") }}"></script>
 
-<script>
-    function switchExampleResponse(endpointId, index) {
-        document.querySelectorAll(`.example-response-${endpointId}`).forEach(el => el.style.display = 'none');
-        document.querySelectorAll(`.example-response-${endpointId}-${index}`).forEach(el => el.style.display = 'initial');
-        document.querySelectorAll(`.example-response-${endpointId}-toggle`).forEach(el => el.value = index);
-    }
+    <script src="{{ asset("/vendor/scribe/js/theme-default-5.3.0.js") }}"></script>
 
+</head>
 
-    /*
-     * Requirement: a div with class `expansion-chevrons`
-     *   (or `expansion-chevrons-solid` to use the solid version).
-     * Also add the `expanded` class if your div is expanded by default.
-     */
-    function toggleExpansionChevrons(evt) {
-        let elem = evt.currentTarget;
+<body data-languages="[&quot;bash&quot;,&quot;javascript&quot;]">
 
-        let chevronsArea = elem.querySelector('.expansion-chevrons');
-        const solid = chevronsArea.classList.contains('expansion-chevrons-solid');
-        const newState = chevronsArea.classList.contains('expanded') ? 'expand' : 'expanded';
-        if (newState === 'expanded') {
-            const selector = solid ? '#expanded-chevron-solid' : '#expanded-chevron';
-            const template = document.querySelector(selector);
-            const chevron = template.content.cloneNode(true);
-            chevronsArea.replaceChildren(chevron);
-            chevronsArea.classList.add('expanded');
-        } else {
-            const selector = solid ? '#expand-chevron-solid' : '#expand-chevron';
-            const template = document.querySelector(selector);
-            const chevron = template.content.cloneNode(true);
-            chevronsArea.replaceChildren(chevron);
-            chevronsArea.classList.remove('expanded');
-        }
-
-    }
-
-    /**
-     * 1. Make sure the children are inside the parent element
-     * 2. Add `expandable` class to the parent
-     * 3. Add `children` class to the children.
-     * 4. Wrap the default chevron SVG in a div with class `expansion-chevrons`
-     *   (or `expansion-chevrons-solid` to use the solid version).
-     *   Also add the `expanded` class if your div is expanded by default.
-     */
-    function toggleElementChildren(evt) {
-        let elem = evt.currentTarget;
-        let children = elem.querySelector(`.children`);
-        if (!children) return;
-
-        if (children.contains(event.target)) return;
-
-        let oldState = children.style.display
-        if (oldState === 'none') {
-            children.style.removeProperty('display');
-            toggleExpansionChevrons(evt);
-        } else {
-            children.style.display = 'none';
-            toggleExpansionChevrons(evt);
-        }
-
-        evt.stopPropagation();
-    }
-
-    function highlightSidebarItem(evt = null) {
-        if (evt && evt.oldURL) {
-            let oldHash = new URL(evt.oldURL).hash.slice(1);
-            if (oldHash) {
-                let previousItem = window['sidebar'].querySelector(`#toc-item-${oldHash}`);
-                previousItem.classList.remove('sl-bg-primary-tint');
-                previousItem.classList.add('sl-bg-canvas-100');
-            }
-        }
-
-        let newHash = location.hash.slice(1);
-        if (newHash) {
-            let item = window['sidebar'].querySelector(`#toc-item-${newHash}`);
-            item.classList.remove('sl-bg-canvas-100');
-            item.classList.add('sl-bg-primary-tint');
-        }
-    }
-
-    addEventListener('DOMContentLoaded', () => {
-        highlightSidebarItem();
-
-        document.querySelectorAll('.code-editor').forEach(elem => CodeJar(elem, (editor) => {
-            // highlight.js does not trim old tags,
-            // which means highlighting doesn't update on type (only on paste)
-            // See https://github.com/antonmedv/codejar/issues/18
-            editor.textContent = editor.textContent
-            return hljs.highlightElement(editor)
-        }));
-
-        document.querySelectorAll('.expandable').forEach(el => {
-            el.addEventListener('click', toggleElementChildren);
-        });
-
-        document.querySelectorAll('details').forEach(el => {
-            el.addEventListener('toggle', toggleExpansionChevrons);
-        });
-    });
-
-    addEventListener('hashchange', highlightSidebarItem);
-</script>
-
-<div class="sl-elements sl-antialiased sl-h-full sl-text-base sl-font-ui sl-text-body sl-flex sl-inset-0">
-
-    <div id="sidebar" class="sl-flex sl-overflow-y-auto sl-flex-col sl-sticky sl-inset-y-0 sl-pt-8 sl-bg-canvas-100 sl-border-r"
-     style="width: calc((100% - 1800px) / 2 + 300px); padding-left: calc((100% - 1800px) / 2); min-width: 300px; max-height: 100vh">
-    <div class="sl-flex sl-items-center sl-mb-5 sl-ml-4">
-                <h4 class="sl-text-paragraph sl-leading-snug sl-font-prose sl-font-semibold sl-text-heading">
-            Laravel API Documentation
-        </h4>
+<a href="#" id="nav-button">
+    <span>
+        MENU
+        <img src="{{ asset("/vendor/scribe/images/navbar.png") }}" alt="navbar-image"/>
+    </span>
+</a>
+<div class="tocify-wrapper">
+    
+            <div class="lang-selector">
+                                            <button type="button" class="lang-button" data-language-name="bash">bash</button>
+                                            <button type="button" class="lang-button" data-language-name="javascript">javascript</button>
+                    </div>
+    
+    <div class="search">
+        <input type="text" class="search" id="input-search" placeholder="Search">
     </div>
 
-    <div class="sl-flex sl-overflow-y-auto sl-flex-col sl-flex-grow sl-flex-shrink">
-        <div class="sl-overflow-y-auto sl-w-full sl-bg-canvas-100">
-            <div class="sl-my-3">
-                                    <div class="expandable">
-                        <div title="Introduction" id="toc-item-introduction"
-                             class="sl-flex sl-items-center sl-h-md sl-pr-4 sl-pl-4 sl-bg-canvas-100 hover:sl-bg-canvas-200 sl-cursor-pointer sl-select-none">
-                            <a href="#introduction"
-                               class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0">Introduction</a>
-                                                    </div>
+    <div id="toc">
+                    <ul id="tocify-header-introduction" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="introduction">
+                    <a href="#introduction">Introduction</a>
+                </li>
+                            </ul>
+                    <ul id="tocify-header-authenticating-requests" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="authenticating-requests">
+                    <a href="#authenticating-requests">Authenticating requests</a>
+                </li>
+                            </ul>
+                    <ul id="tocify-header-tasks" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="tasks">
+                    <a href="#tasks">Tasks</a>
+                </li>
+                                    <ul id="tocify-subheader-tasks" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="tasks-GETapi-v1-tasks">
+                                <a href="#tasks-GETapi-v1-tasks">GET api/v1/tasks</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="tasks-GETapi-v1-tasks--id-">
+                                <a href="#tasks-GETapi-v1-tasks--id-">GET api/v1/tasks/{id}</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="tasks-POSTapi-v1-tasks">
+                                <a href="#tasks-POSTapi-v1-tasks">POST api/v1/tasks</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="tasks-PUTapi-v1-tasks--id-">
+                                <a href="#tasks-PUTapi-v1-tasks--id-">PUT api/v1/tasks/{id}</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="tasks-DELETEapi-v1-tasks--id-">
+                                <a href="#tasks-DELETEapi-v1-tasks--id-">DELETE api/v1/tasks/{id}</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="tasks-PATCHapi-v1-tasks--id--complete">
+                                <a href="#tasks-PATCHapi-v1-tasks--id--complete">PATCH api/v1/tasks/{id}/complete</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="tasks-PATCHapi-v1-tasks--id--pending">
+                                <a href="#tasks-PATCHapi-v1-tasks--id--pending">PATCH api/v1/tasks/{id}/pending</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
+            </div>
 
-                                            </div>
-                                    <div class="expandable">
-                        <div title="Authenticating requests" id="toc-item-authenticating-requests"
-                             class="sl-flex sl-items-center sl-h-md sl-pr-4 sl-pl-4 sl-bg-canvas-100 hover:sl-bg-canvas-200 sl-cursor-pointer sl-select-none">
-                            <a href="#authenticating-requests"
-                               class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0">Authenticating requests</a>
-                                                    </div>
+    <ul class="toc-footer" id="toc-footer">
+                    <li style="padding-bottom: 5px;"><a href="{{ route("scribe.postman") }}">View Postman collection</a></li>
+                            <li style="padding-bottom: 5px;"><a href="{{ route("scribe.openapi") }}">View OpenAPI spec</a></li>
+                <li><a href="http://github.com/knuckleswtf/scribe">Documentation powered by Scribe ✍</a></li>
+    </ul>
 
-                                            </div>
-                                    <div class="expandable">
-                        <div title="Tasks" id="toc-item-tasks"
-                             class="sl-flex sl-items-center sl-h-md sl-pr-4 sl-pl-4 sl-bg-canvas-100 hover:sl-bg-canvas-200 sl-cursor-pointer sl-select-none">
-                            <a href="#tasks"
-                               class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0">Tasks</a>
-                                                            <div class="sl-flex sl-items-center sl-text-xs expansion-chevrons">
-                                    <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                         data-icon="chevron-right"
-                                         class="svg-inline--fa fa-chevron-right fa-fw sl-icon sl-text-muted"
-                                         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                        <path fill="currentColor"
-                                              d="M96 480c-8.188 0-16.38-3.125-22.62-9.375c-12.5-12.5-12.5-32.75 0-45.25L242.8 256L73.38 86.63c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0l192 192c12.5 12.5 12.5 32.75 0 45.25l-192 192C112.4 476.9 104.2 480 96 480z"></path>
-                                    </svg>
-                                </div>
-                                                    </div>
-
-                                                    <div class="children" style="display: none;">
-                                                                    <div class="expandable">
-                                        <div class="sl-flex sl-items-center sl-h-md sl-pr-4 sl-pl-8 sl-bg-canvas-100 hover:sl-bg-canvas-200 sl-cursor-pointer sl-select-none"
-                                             id="toc-item-tasks-GETapi-v1-tasks">
-                                            <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="List all tasks">
-                                                <a class="ElementsTableOfContentsItem sl-block sl-no-underline"
-                                                   href="#tasks-GETapi-v1-tasks">
-                                                    List all tasks
-                                                </a>
-                                            </div>
-                                                                                    </div>
-
-                                                                            </div>
-                                                                    <div class="expandable">
-                                        <div class="sl-flex sl-items-center sl-h-md sl-pr-4 sl-pl-8 sl-bg-canvas-100 hover:sl-bg-canvas-200 sl-cursor-pointer sl-select-none"
-                                             id="toc-item-tasks-POSTapi-v1-tasks">
-                                            <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="Create a new task">
-                                                <a class="ElementsTableOfContentsItem sl-block sl-no-underline"
-                                                   href="#tasks-POSTapi-v1-tasks">
-                                                    Create a new task
-                                                </a>
-                                            </div>
-                                                                                    </div>
-
-                                                                            </div>
-                                                                    <div class="expandable">
-                                        <div class="sl-flex sl-items-center sl-h-md sl-pr-4 sl-pl-8 sl-bg-canvas-100 hover:sl-bg-canvas-200 sl-cursor-pointer sl-select-none"
-                                             id="toc-item-tasks-GETapi-v1-tasks--id-">
-                                            <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="Get a specific task">
-                                                <a class="ElementsTableOfContentsItem sl-block sl-no-underline"
-                                                   href="#tasks-GETapi-v1-tasks--id-">
-                                                    Get a specific task
-                                                </a>
-                                            </div>
-                                                                                    </div>
-
-                                                                            </div>
-                                                                    <div class="expandable">
-                                        <div class="sl-flex sl-items-center sl-h-md sl-pr-4 sl-pl-8 sl-bg-canvas-100 hover:sl-bg-canvas-200 sl-cursor-pointer sl-select-none"
-                                             id="toc-item-tasks-PUTapi-v1-tasks--id-">
-                                            <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="Update a task">
-                                                <a class="ElementsTableOfContentsItem sl-block sl-no-underline"
-                                                   href="#tasks-PUTapi-v1-tasks--id-">
-                                                    Update a task
-                                                </a>
-                                            </div>
-                                                                                    </div>
-
-                                                                            </div>
-                                                                    <div class="expandable">
-                                        <div class="sl-flex sl-items-center sl-h-md sl-pr-4 sl-pl-8 sl-bg-canvas-100 hover:sl-bg-canvas-200 sl-cursor-pointer sl-select-none"
-                                             id="toc-item-tasks-DELETEapi-v1-tasks--id-">
-                                            <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="Delete a task">
-                                                <a class="ElementsTableOfContentsItem sl-block sl-no-underline"
-                                                   href="#tasks-DELETEapi-v1-tasks--id-">
-                                                    Delete a task
-                                                </a>
-                                            </div>
-                                                                                    </div>
-
-                                                                            </div>
-                                                                    <div class="expandable">
-                                        <div class="sl-flex sl-items-center sl-h-md sl-pr-4 sl-pl-8 sl-bg-canvas-100 hover:sl-bg-canvas-200 sl-cursor-pointer sl-select-none"
-                                             id="toc-item-tasks-PATCHapi-v1-tasks--id--complete">
-                                            <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="Mark task as complete">
-                                                <a class="ElementsTableOfContentsItem sl-block sl-no-underline"
-                                                   href="#tasks-PATCHapi-v1-tasks--id--complete">
-                                                    Mark task as complete
-                                                </a>
-                                            </div>
-                                                                                    </div>
-
-                                                                            </div>
-                                                                    <div class="expandable">
-                                        <div class="sl-flex sl-items-center sl-h-md sl-pr-4 sl-pl-8 sl-bg-canvas-100 hover:sl-bg-canvas-200 sl-cursor-pointer sl-select-none"
-                                             id="toc-item-tasks-PATCHapi-v1-tasks--id--pending">
-                                            <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="Mark task as pending">
-                                                <a class="ElementsTableOfContentsItem sl-block sl-no-underline"
-                                                   href="#tasks-PATCHapi-v1-tasks--id--pending">
-                                                    Mark task as pending
-                                                </a>
-                                            </div>
-                                                                                    </div>
-
-                                                                            </div>
-                                                            </div>
-                                            </div>
-                            </div>
-
-        </div>
-        <div class="sl-flex sl-items-center sl-px-4 sl-py-3 sl-border-t">
-            Last updated: September 21, 2025
-        </div>
-
-        <div class="sl-flex sl-items-center sl-px-4 sl-py-3 sl-border-t">
-            <a href="http://github.com/knuckleswtf/scribe">Documentation powered by Scribe ✍</a>
-        </div>
-    </div>
+    <ul class="toc-footer" id="last-updated">
+        <li>Last updated: September 22, 2025</li>
+    </ul>
 </div>
 
-    <div class="sl-overflow-y-auto sl-flex-1 sl-w-full sl-px-16 sl-bg-canvas sl-py-16" style="max-width: 1500px;">
-
-        <div class="sl-mb-10">
-            <div class="sl-mb-4">
-                <h1 class="sl-text-5xl sl-leading-tight sl-font-prose sl-font-semibold sl-text-heading">
-                    Laravel API Documentation
-                </h1>
-                                    <a title="Download Postman collection" class="sl-mx-1"
-                       href="{{ route("scribe.postman") }}" target="_blank">
-                        <small>Postman collection →</small>
-                    </a>
-                                                    <a title="Download OpenAPI spec" class="sl-mx-1"
-                       href="{{ route("scribe.openapi") }}" target="_blank">
-                        <small>OpenAPI spec →</small>
-                    </a>
-                            </div>
-
-            <div class="sl-prose sl-markdown-viewer sl-my-4">
-                <h1 id="introduction">Introduction</h1>
+<div class="page-wrapper">
+    <div class="dark-box"></div>
+    <div class="content">
+        <h1 id="introduction">Introduction</h1>
 <p>RESTful API for task management</p>
 <aside>
     <strong>Base URL</strong>: <code>http://localhost</code>
@@ -451,440 +129,35 @@ Key Features:
 - RESTful Design: Clean, predictable endpoint structure
 - JSON Responses: Consistent response format across all endpoints</code></pre>
 
-                <h1 id="authenticating-requests">Authenticating requests</h1>
+        <h1 id="authenticating-requests">Authenticating requests</h1>
 <p>This API is not authenticated.</p>
-            </div>
-        </div>
 
-        <h1 id="tasks"
-        class="sl-text-5xl sl-leading-tight sl-font-prose sl-text-heading"
-    >
-        Tasks
-    </h1>
+        <h1 id="tasks">Tasks</h1>
 
-    <p>API for managing tasks</p>
-<p>This API provides complete CRUD operations for task management with filtering,
-pagination, and status updates. No authentication is required.</p>
+    
 
-                                <div class="sl-stack sl-stack--vertical sl-stack--8 HttpOperation sl-flex sl-flex-col sl-items-stretch sl-w-full">
-    <div class="sl-stack sl-stack--vertical sl-stack--5 sl-flex sl-flex-col sl-items-stretch">
-        <div class="sl-relative">
-            <div class="sl-stack sl-stack--horizontal sl-stack--5 sl-flex sl-flex-row sl-items-center">
-                <h2 class="sl-text-3xl sl-leading-tight sl-font-prose sl-text-heading sl-mt-5 sl-mb-1"
-                    id="tasks-GETapi-v1-tasks">
-                    List all tasks
-                </h2>
-            </div>
-        </div>
+                                <h2 id="tasks-GETapi-v1-tasks">GET api/v1/tasks</h2>
 
-        <div class="sl-relative">
-            <div title="http://localhost/api/v1/tasks"
-                     class="sl-stack sl-stack--horizontal sl-stack--3 sl-inline-flex sl-flex-row sl-items-center sl-max-w-full sl-font-mono sl-py-2 sl-pr-4 sl-bg-canvas-50 sl-rounded-lg"
-                >
-                                            <div class="sl-text-lg sl-font-semibold sl-px-2.5 sl-py-1 sl-text-on-primary sl-rounded-lg"
-                             style="background-color: green;"
-                        >
-                            GET
-                        </div>
-                                        <div class="sl-flex sl-overflow-x-hidden sl-text-lg sl-select-all">
-                        <div dir="rtl"
-                             class="sl-overflow-x-hidden sl-truncate sl-text-muted">http://localhost</div>
-                        <div class="sl-flex-1 sl-font-semibold">/api/v1/tasks</div>
-                    </div>
+<p>
+</p>
 
-                                                            </div>
-        </div>
 
-        <p>Get a paginated list of tasks with optional filtering capabilities.</p>
-    </div>
-    <div class="sl-flex">
-        <div data-testid="two-column-left" class="sl-flex-1 sl-w-0">
-            <div class="sl-stack sl-stack--vertical sl-stack--10 sl-flex sl-flex-col sl-items-stretch">
-                <div class="sl-stack sl-stack--vertical sl-stack--8 sl-flex sl-flex-col sl-items-stretch">
-                                            <div class="sl-stack sl-stack--vertical sl-stack--5 sl-flex sl-flex-col sl-items-stretch">
-                            <h3 class="sl-text-2xl sl-leading-snug sl-font-prose">
-                                Headers
-                            </h3>
-                            <div class="sl-text-sm">
-                                                                    <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">Content-Type</div>
-                                    </div>
-                                    </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        application/json
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                                    <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">Accept</div>
-                                    </div>
-                                    </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        application/json
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                            </div>
-                        </div>
-                    
-                    
 
-                                                <div class="sl-stack sl-stack--vertical sl-stack--6 sl-flex sl-flex-col sl-items-stretch">
-                                <h3 class="sl-text-2xl sl-leading-snug sl-font-prose">Query Parameters</h3>
+<span id="example-requests-GETapi-v1-tasks">
+<blockquote>Example request:</blockquote>
 
-                                <div class="sl-text-sm">
-                                                                            <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">page</div>
-                                            <span class="sl-truncate sl-text-muted">integer</span>
-                                    </div>
-                                    </div>
-                <div class="sl-prose sl-markdown-viewer" style="font-size: 12px;">
-            <p>Page number for pagination.</p>
-        </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        1
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                                            <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">per_page</div>
-                                            <span class="sl-truncate sl-text-muted">integer</span>
-                                    </div>
-                                    </div>
-                <div class="sl-prose sl-markdown-viewer" style="font-size: 12px;">
-            <p>Number of items per page (1-100).</p>
-        </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        15
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                                            <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">completed</div>
-                                            <span class="sl-truncate sl-text-muted">boolean</span>
-                                    </div>
-                                    </div>
-                <div class="sl-prose sl-markdown-viewer" style="font-size: 12px;">
-            <p>Filter by completion status.</p>
-        </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        true
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                                            <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">search</div>
-                                            <span class="sl-truncate sl-text-muted">string</span>
-                                    </div>
-                                    </div>
-                <div class="sl-prose sl-markdown-viewer" style="font-size: 12px;">
-            <p>Search term to filter tasks by title.</p>
-        </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        important
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                                </div>
-                        </div>
-                    
-                    
-                                    </div>
-            </div>
-        </div>
 
-        <div data-testid="two-column-right" class="sl-relative sl-w-2/5 sl-ml-16" style="max-width: 500px;">
-            <div class="sl-stack sl-stack--vertical sl-stack--6 sl-flex sl-flex-col sl-items-stretch">
-
-                                    <div class="sl-inverted">
-    <div class="sl-overflow-y-hidden sl-rounded-lg">
-        <form class="TryItPanel sl-bg-canvas-100 sl-rounded-lg"
-              data-method="GET"
-              data-path="api/v1/tasks"
-              data-hasfiles="0"
-              data-hasjsonbody="0">
-            
-                            <div class="sl-panel sl-outline-none sl-w-full expandable">
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            Headers
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                        <div class="ParameterGrid sl-p-4">
-                                                                                            <label aria-hidden="true"
-                                       for="header-GETapi-v1-tasks-Content-Type">Content-Type</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                        <input aria-label="Content-Type" name="Content-Type"
-                                               id="header-GETapi-v1-tasks-Content-Type"
-                                               value="application/json" data-component="header"
-                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
-                                    </div>
-                                </div>
-                                                                                            <label aria-hidden="true"
-                                       for="header-GETapi-v1-tasks-Accept">Accept</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                        <input aria-label="Accept" name="Accept"
-                                               id="header-GETapi-v1-tasks-Accept"
-                                               value="application/json" data-component="header"
-                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
-                                    </div>
-                                </div>
-                                                    </div>
-                    </div>
-                </div>
-            
-            
-                            <div class="sl-panel sl-outline-none sl-w-full expandable">
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            Query Parameters
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                        <div class="ParameterGrid sl-p-4">
-                                                                                            <label aria-hidden="true"
-                                       for="queryparam-GETapi-v1-tasks-page">page</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                                                                    <input aria-label="page" name="page"
-                                                   id="queryparam-GETapi-v1-tasks-page"
-                                                   placeholder="Page number for pagination."
-                                                   value="1" data-component="query"
-                                                   class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border"
-                                            >
-                                                                            </div>
-                                </div>
-                                                                                            <label aria-hidden="true"
-                                       for="queryparam-GETapi-v1-tasks-per_page">per_page</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                                                                    <input aria-label="per_page" name="per_page"
-                                                   id="queryparam-GETapi-v1-tasks-per_page"
-                                                   placeholder="Number of items per page (1-100)."
-                                                   value="15" data-component="query"
-                                                   class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border"
-                                            >
-                                                                            </div>
-                                </div>
-                                                                                            <label aria-hidden="true"
-                                       for="queryparam-GETapi-v1-tasks-completed">completed</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                                                                    <input aria-label="completed" name="completed"
-                                                   id="queryparam-GETapi-v1-tasks-completed"
-                                                   placeholder="Filter by completion status."
-                                                   value="1" data-component="query"
-                                                   class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border"
-                                            >
-                                                                            </div>
-                                </div>
-                                                                                            <label aria-hidden="true"
-                                       for="queryparam-GETapi-v1-tasks-search">search</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                                                                    <input aria-label="search" name="search"
-                                                   id="queryparam-GETapi-v1-tasks-search"
-                                                   placeholder="Search term to filter tasks by title."
-                                                   value="important" data-component="query"
-                                                   class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border"
-                                            >
-                                                                            </div>
-                                </div>
-                                                    </div>
-                    </div>
-                </div>
-            
-            
-            <div class="SendButtonHolder sl-mt-4 sl-p-4 sl-pt-0">
-                <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-center">
-                    <button type="button" data-endpoint="GETapi-v1-tasks"
-                            class="tryItOut-btn sl-button sl-h-sm sl-text-base sl-font-medium sl-px-1.5 sl-bg-primary hover:sl-bg-primary-dark active:sl-bg-primary-darker disabled:sl-bg-canvas-100 sl-text-on-primary disabled:sl-text-body sl-rounded sl-border-transparent sl-border disabled:sl-opacity-70"
-                    >
-                        Send Request 💥
-                    </button>
-                </div>
-            </div>
-
-            <div data-endpoint="GETapi-v1-tasks"
-                 class="tryItOut-error expandable sl-panel sl-outline-none sl-w-full" hidden>
-                <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                     role="button">
-                    <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                        <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                            <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                 data-icon="caret-down"
-                                 class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                <path fill="currentColor"
-                                      d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                            </svg>
-                        </div>
-                        Request failed with error
-                    </div>
-                </div>
-                <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                    <div class="sl-panel__content sl-p-4">
-                        <p class="sl-pb-2"><strong class="error-message"></strong></p>
-                        <p class="sl-pb-2">Tip: Check that you&#039;re properly connected to the network.
-If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
-You can check the Dev Tools console for debugging information.</p>
-                    </div>
-                </div>
-            </div>
-
-                <div data-endpoint="GETapi-v1-tasks"
-                     class="tryItOut-response expandable sl-panel sl-outline-none sl-w-full" hidden>
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            Received response
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                        <div class="sl-panel__content sl-p-4">
-                            <p class="sl-pb-2 response-status"></p>
-                            <pre><code class="sl-pb-2 response-content language-json"
-                                       data-empty-response-text="<Empty response>"
-                                       style="max-height: 300px;"></code></pre>
-                        </div>
-                    </div>
-                </div>
-        </form>
-    </div>
-</div>
-                
-                                            <div class="sl-panel sl-outline-none sl-w-full sl-rounded-lg">
-                            <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-3 sl-pl-4 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-select-none">
-                                <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                                    <div class="sl--ml-2">
-                                        Example request:
-                                        <select class="example-request-lang-toggle sl-text-base"
-                                                aria-label="Request Sample Language"
-                                                onchange="switchExampleLanguage(event.target.value);">
-                                                                                            <option>bash</option>
-                                                                                            <option>javascript</option>
-                                                                                    </select>
-                                    </div>
-                                </div>
-                            </div>
-                                                            <div class="sl-bg-canvas-100 example-request example-request-bash"
-                                     style="">
-                                    <div class="sl-px-0 sl-py-1">
-                                        <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
-                                            <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/v1/tasks?page=1&amp;per_page=15&amp;completed=1&amp;search=important" \
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/tasks" \
     --header "Content-Type: application/json" \
-    --header "Accept: application/json"</code></pre>                                        </div>
-                                    </div>
-                                </div>
-                                                            <div class="sl-bg-canvas-100 example-request example-request-javascript"
-                                     style="display: none;">
-                                    <div class="sl-px-0 sl-py-1">
-                                        <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
-                                            <pre><code class="language-javascript">const url = new URL(
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
     "http://localhost/api/v1/tasks"
 );
-
-const params = {
-    "page": "1",
-    "per_page": "15",
-    "completed": "1",
-    "search": "important",
-};
-Object.keys(params)
-    .forEach(key =&gt; url.searchParams.append(key, params[key]));
 
 const headers = {
     "Content-Type": "application/json",
@@ -894,61 +167,181 @@ const headers = {
 fetch(url, {
     method: "GET",
     headers,
-}).then(response =&gt; response.json());</code></pre>                                        </div>
-                                    </div>
-                                </div>
-                                                    </div>
-                    
-                                            <div class="sl-panel sl-outline-none sl-w-full sl-rounded-lg">
-                            <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-3 sl-pl-4 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-select-none">
-                                <div class="sl-flex sl-flex-1 sl-items-center sl-py-2">
-                                    <div class="sl--ml-2">
-                                        <div class="sl-h-sm sl-text-base sl-font-medium sl-px-1.5 sl-text-muted sl-rounded sl-border-transparent sl-border">
-                                            <div class="sl-mb-2 sl-inline-block">Example response:</div>
-                                            <div class="sl-mb-2 sl-inline-block">
-                                                <select
-                                                        class="example-response-GETapi-v1-tasks-toggle sl-text-base"
-                                                        aria-label="Response sample"
-                                                        onchange="switchExampleResponse('GETapi-v1-tasks', event.target.value);">
-                                                                                                            <option value="0">200</option>
-                                                                                                            <option value="1">500</option>
-                                                                                                    </select></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button type="button"
-                                        class="sl-button sl-h-sm sl-text-base sl-font-medium sl-px-1.5 hover:sl-bg-canvas-50 active:sl-bg-canvas-100 sl-text-muted hover:sl-text-body focus:sl-text-body sl-rounded sl-border-transparent sl-border disabled:sl-opacity-70">
-                                    <div class="sl-mx-0">
-                                        <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="copy"
-                                             class="svg-inline--fa fa-copy fa-fw fa-sm sl-icon" role="img"
-                                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                                            <path fill="currentColor"
-                                                  d="M384 96L384 0h-112c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48H464c26.51 0 48-21.49 48-48V128h-95.1C398.4 128 384 113.6 384 96zM416 0v96h96L416 0zM192 352V128h-144c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48h192c26.51 0 48-21.49 48-48L288 416h-32C220.7 416 192 387.3 192 352z"></path>
-                                        </svg>
-                                    </div>
-                                </button>
-                            </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-GETapi-v1-tasks example-response-GETapi-v1-tasks-0"
-                                     style=" "
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-tasks">
+            <blockquote>
+            <p>Example response (200):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+x-ratelimit-limit: 60
+x-ratelimit-remaining: 59
+access-control-allow-origin: *
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
     &quot;success&quot;: true,
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 1,
-            &quot;title&quot;: &quot;Complete project documentation&quot;,
+            &quot;id&quot;: 3,
+            &quot;title&quot;: &quot;Possimus occaecati aut illum.&quot;,
+            &quot;completed&quot;: false,
+            &quot;status&quot;: &quot;pending&quot;,
+            &quot;created_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;deleted_at&quot;: null,
+            &quot;is_deleted&quot;: false
+        },
+        {
+            &quot;id&quot;: 4,
+            &quot;title&quot;: &quot;Qui asperiores alias labore quo earum.&quot;,
+            &quot;completed&quot;: false,
+            &quot;status&quot;: &quot;pending&quot;,
+            &quot;created_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;deleted_at&quot;: null,
+            &quot;is_deleted&quot;: false
+        },
+        {
+            &quot;id&quot;: 5,
+            &quot;title&quot;: &quot;Amet inventore aut dolores fugit tempore.&quot;,
+            &quot;completed&quot;: false,
+            &quot;status&quot;: &quot;pending&quot;,
+            &quot;created_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;deleted_at&quot;: null,
+            &quot;is_deleted&quot;: false
+        },
+        {
+            &quot;id&quot;: 6,
+            &quot;title&quot;: &quot;Assumenda et ut rerum dicta consequuntur ut quos.&quot;,
+            &quot;completed&quot;: false,
+            &quot;status&quot;: &quot;pending&quot;,
+            &quot;created_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;deleted_at&quot;: null,
+            &quot;is_deleted&quot;: false
+        },
+        {
+            &quot;id&quot;: 7,
+            &quot;title&quot;: &quot;Dignissimos ratione consequatur esse veritatis porro velit.&quot;,
             &quot;completed&quot;: true,
             &quot;status&quot;: &quot;completed&quot;,
-            &quot;created_at&quot;: &quot;2025-09-21T10:00:00.000000Z&quot;,
-            &quot;updated_at&quot;: &quot;2025-09-21T10:30:00.000000Z&quot;,
+            &quot;created_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;deleted_at&quot;: null,
+            &quot;is_deleted&quot;: false
+        },
+        {
+            &quot;id&quot;: 8,
+            &quot;title&quot;: &quot;Ipsa quo magnam aliquam.&quot;,
+            &quot;completed&quot;: false,
+            &quot;status&quot;: &quot;pending&quot;,
+            &quot;created_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;deleted_at&quot;: null,
+            &quot;is_deleted&quot;: false
+        },
+        {
+            &quot;id&quot;: 9,
+            &quot;title&quot;: &quot;Pariatur provident vitae minima placeat.&quot;,
+            &quot;completed&quot;: false,
+            &quot;status&quot;: &quot;pending&quot;,
+            &quot;created_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;deleted_at&quot;: null,
+            &quot;is_deleted&quot;: false
+        },
+        {
+            &quot;id&quot;: 10,
+            &quot;title&quot;: &quot;Voluptatem laboriosam sit qui.&quot;,
+            &quot;completed&quot;: false,
+            &quot;status&quot;: &quot;pending&quot;,
+            &quot;created_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;deleted_at&quot;: null,
+            &quot;is_deleted&quot;: false
+        },
+        {
+            &quot;id&quot;: 11,
+            &quot;title&quot;: &quot;Architecto at perspiciatis ut minima iusto corrupti.&quot;,
+            &quot;completed&quot;: true,
+            &quot;status&quot;: &quot;completed&quot;,
+            &quot;created_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;deleted_at&quot;: null,
+            &quot;is_deleted&quot;: false
+        },
+        {
+            &quot;id&quot;: 12,
+            &quot;title&quot;: &quot;Atque ratione iste deleniti cupiditate exercitationem rerum numquam.&quot;,
+            &quot;completed&quot;: true,
+            &quot;status&quot;: &quot;completed&quot;,
+            &quot;created_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;deleted_at&quot;: null,
+            &quot;is_deleted&quot;: false
+        },
+        {
+            &quot;id&quot;: 13,
+            &quot;title&quot;: &quot;Nostrum quis repellendus dolorum neque dolore sunt modi.&quot;,
+            &quot;completed&quot;: true,
+            &quot;status&quot;: &quot;completed&quot;,
+            &quot;created_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;deleted_at&quot;: null,
+            &quot;is_deleted&quot;: false
+        },
+        {
+            &quot;id&quot;: 14,
+            &quot;title&quot;: &quot;Ipsam aliquam sint eum repellat quidem aliquid odit.&quot;,
+            &quot;completed&quot;: true,
+            &quot;status&quot;: &quot;completed&quot;,
+            &quot;created_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;deleted_at&quot;: null,
+            &quot;is_deleted&quot;: false
+        },
+        {
+            &quot;id&quot;: 15,
+            &quot;title&quot;: &quot;Nesciunt ab tenetur fuga velit saepe natus.&quot;,
+            &quot;completed&quot;: false,
+            &quot;status&quot;: &quot;pending&quot;,
+            &quot;created_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;deleted_at&quot;: null,
+            &quot;is_deleted&quot;: false
+        },
+        {
+            &quot;id&quot;: 16,
+            &quot;title&quot;: &quot;Qui quos unde corporis a sapiente earum porro.&quot;,
+            &quot;completed&quot;: false,
+            &quot;status&quot;: &quot;pending&quot;,
+            &quot;created_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;deleted_at&quot;: null,
+            &quot;is_deleted&quot;: false
+        },
+        {
+            &quot;id&quot;: 17,
+            &quot;title&quot;: &quot;Eveniet et in occaecati et.&quot;,
+            &quot;completed&quot;: false,
+            &quot;status&quot;: &quot;pending&quot;,
+            &quot;created_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
             &quot;deleted_at&quot;: null,
             &quot;is_deleted&quot;: false
         }
     ],
     &quot;meta&quot;: {
-        &quot;total&quot;: 25,
+        &quot;total&quot;: 20,
         &quot;per_page&quot;: 15,
         &quot;current_page&quot;: 1,
         &quot;last_page&quot;: 2,
@@ -961,739 +354,101 @@ fetch(url, {
         &quot;prev&quot;: null,
         &quot;next&quot;: &quot;http://localhost/api/v1/tasks?page=2&quot;
     }
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-GETapi-v1-tasks example-response-GETapi-v1-tasks-1"
-                                     style=" display: none;"
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
-    &quot;success&quot;: false,
-    &quot;message&quot;: &quot;Internal server error&quot;
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                    </div>
-                            </div>
-    </div>
-</div>
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-tasks" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-tasks"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-tasks"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-tasks" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-tasks">
 
-                    <div class="sl-stack sl-stack--vertical sl-stack--8 HttpOperation sl-flex sl-flex-col sl-items-stretch sl-w-full">
-    <div class="sl-stack sl-stack--vertical sl-stack--5 sl-flex sl-flex-col sl-items-stretch">
-        <div class="sl-relative">
-            <div class="sl-stack sl-stack--horizontal sl-stack--5 sl-flex sl-flex-row sl-items-center">
-                <h2 class="sl-text-3xl sl-leading-tight sl-font-prose sl-text-heading sl-mt-5 sl-mb-1"
-                    id="tasks-POSTapi-v1-tasks">
-                    Create a new task
-                </h2>
-            </div>
-        </div>
-
-        <div class="sl-relative">
-            <div title="http://localhost/api/v1/tasks"
-                     class="sl-stack sl-stack--horizontal sl-stack--3 sl-inline-flex sl-flex-row sl-items-center sl-max-w-full sl-font-mono sl-py-2 sl-pr-4 sl-bg-canvas-50 sl-rounded-lg"
-                >
-                                            <div class="sl-text-lg sl-font-semibold sl-px-2.5 sl-py-1 sl-text-on-primary sl-rounded-lg"
-                             style="background-color: black;"
-                        >
-                            POST
-                        </div>
-                                        <div class="sl-flex sl-overflow-x-hidden sl-text-lg sl-select-all">
-                        <div dir="rtl"
-                             class="sl-overflow-x-hidden sl-truncate sl-text-muted">http://localhost</div>
-                        <div class="sl-flex-1 sl-font-semibold">/api/v1/tasks</div>
-                    </div>
-
-                                                            </div>
-        </div>
-
-        <p>Create a new task with the provided title.</p>
-    </div>
-    <div class="sl-flex">
-        <div data-testid="two-column-left" class="sl-flex-1 sl-w-0">
-            <div class="sl-stack sl-stack--vertical sl-stack--10 sl-flex sl-flex-col sl-items-stretch">
-                <div class="sl-stack sl-stack--vertical sl-stack--8 sl-flex sl-flex-col sl-items-stretch">
-                                            <div class="sl-stack sl-stack--vertical sl-stack--5 sl-flex sl-flex-col sl-items-stretch">
-                            <h3 class="sl-text-2xl sl-leading-snug sl-font-prose">
-                                Headers
-                            </h3>
-                            <div class="sl-text-sm">
-                                                                    <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">Content-Type</div>
-                                    </div>
-                                    </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        application/json
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                                    <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">Accept</div>
-                                    </div>
-                                    </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        application/json
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                            </div>
-                        </div>
-                    
-                    
-
-                    
-                                            <div class="sl-stack sl-stack--vertical sl-stack--6 sl-flex sl-flex-col sl-items-stretch">
-                            <h3 class="sl-text-2xl sl-leading-snug sl-font-prose">Body Parameters</h3>
-
-                                <div class="sl-text-sm">
-                                    <div class="expandable sl-text-sm sl-border-l sl-ml-px">
-        <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">title</div>
-                                            <span class="sl-truncate sl-text-muted">string</span>
-                                    </div>
-                                    <div class="sl-flex-1 sl-h-px sl-mx-3"></div>
-                    <span class="sl-ml-2 sl-text-warning">required</span>
-                                    </div>
-                <div class="sl-prose sl-markdown-viewer" style="font-size: 12px;">
-            <p>The title of the task. Must be at least 3 characters.</p>
-        </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        Learn Laravel
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-
-            </div>
-                            </div>
-                        </div>
-                    
-                                    </div>
-            </div>
-        </div>
-
-        <div data-testid="two-column-right" class="sl-relative sl-w-2/5 sl-ml-16" style="max-width: 500px;">
-            <div class="sl-stack sl-stack--vertical sl-stack--6 sl-flex sl-flex-col sl-items-stretch">
-
-                                    <div class="sl-inverted">
-    <div class="sl-overflow-y-hidden sl-rounded-lg">
-        <form class="TryItPanel sl-bg-canvas-100 sl-rounded-lg"
-              data-method="POST"
-              data-path="api/v1/tasks"
-              data-hasfiles="0"
-              data-hasjsonbody="1">
-            
-                            <div class="sl-panel sl-outline-none sl-w-full expandable">
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            Headers
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                        <div class="ParameterGrid sl-p-4">
-                                                                                            <label aria-hidden="true"
-                                       for="header-POSTapi-v1-tasks-Content-Type">Content-Type</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                        <input aria-label="Content-Type" name="Content-Type"
-                                               id="header-POSTapi-v1-tasks-Content-Type"
-                                               value="application/json" data-component="header"
-                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
-                                    </div>
-                                </div>
-                                                                                            <label aria-hidden="true"
-                                       for="header-POSTapi-v1-tasks-Accept">Accept</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                        <input aria-label="Accept" name="Accept"
-                                               id="header-POSTapi-v1-tasks-Accept"
-                                               value="application/json" data-component="header"
-                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
-                                    </div>
-                                </div>
-                                                    </div>
-                    </div>
-                </div>
-            
-            
-            
-                            <div class="sl-panel sl-outline-none sl-w-full expandable">
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            Body
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                                                    <div class="TextRequestBody sl-p-4">
-                                <div class="code-editor language-json"
-                                     id="json-body-POSTapi-v1-tasks"
-                                     style="font-family: var(--font-code); font-size: 12px; line-height: var(--lh-code);"
-                                >{
-    "title": "Learn Laravel"
-}</div>
-                            </div>
-                                            </div>
-                </div>
-            
-            <div class="SendButtonHolder sl-mt-4 sl-p-4 sl-pt-0">
-                <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-center">
-                    <button type="button" data-endpoint="POSTapi-v1-tasks"
-                            class="tryItOut-btn sl-button sl-h-sm sl-text-base sl-font-medium sl-px-1.5 sl-bg-primary hover:sl-bg-primary-dark active:sl-bg-primary-darker disabled:sl-bg-canvas-100 sl-text-on-primary disabled:sl-text-body sl-rounded sl-border-transparent sl-border disabled:sl-opacity-70"
-                    >
-                        Send Request 💥
-                    </button>
-                </div>
-            </div>
-
-            <div data-endpoint="POSTapi-v1-tasks"
-                 class="tryItOut-error expandable sl-panel sl-outline-none sl-w-full" hidden>
-                <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                     role="button">
-                    <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                        <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                            <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                 data-icon="caret-down"
-                                 class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                <path fill="currentColor"
-                                      d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                            </svg>
-                        </div>
-                        Request failed with error
-                    </div>
-                </div>
-                <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                    <div class="sl-panel__content sl-p-4">
-                        <p class="sl-pb-2"><strong class="error-message"></strong></p>
-                        <p class="sl-pb-2">Tip: Check that you&#039;re properly connected to the network.
+Tip: Check that you&#039;re properly connected to the network.
 If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
-You can check the Dev Tools console for debugging information.</p>
-                    </div>
-                </div>
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-tasks" data-method="GET"
+      data-path="api/v1/tasks"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-tasks', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-tasks"
+                    onclick="tryItOut('GETapi-v1-tasks');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-tasks"
+                    onclick="cancelTryOut('GETapi-v1-tasks');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-tasks"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/tasks</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-tasks"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
             </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-tasks"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
 
-                <div data-endpoint="POSTapi-v1-tasks"
-                     class="tryItOut-response expandable sl-panel sl-outline-none sl-w-full" hidden>
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            Received response
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                        <div class="sl-panel__content sl-p-4">
-                            <p class="sl-pb-2 response-status"></p>
-                            <pre><code class="sl-pb-2 response-content language-json"
-                                       data-empty-response-text="<Empty response>"
-                                       style="max-height: 300px;"></code></pre>
-                        </div>
-                    </div>
-                </div>
-        </form>
-    </div>
-</div>
-                
-                                            <div class="sl-panel sl-outline-none sl-w-full sl-rounded-lg">
-                            <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-3 sl-pl-4 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-select-none">
-                                <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                                    <div class="sl--ml-2">
-                                        Example request:
-                                        <select class="example-request-lang-toggle sl-text-base"
-                                                aria-label="Request Sample Language"
-                                                onchange="switchExampleLanguage(event.target.value);">
-                                                                                            <option>bash</option>
-                                                                                            <option>javascript</option>
-                                                                                    </select>
-                                    </div>
-                                </div>
-                            </div>
-                                                            <div class="sl-bg-canvas-100 example-request example-request-bash"
-                                     style="">
-                                    <div class="sl-px-0 sl-py-1">
-                                        <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
-                                            <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/v1/tasks" \
+                    <h2 id="tasks-GETapi-v1-tasks--id-">GET api/v1/tasks/{id}</h2>
+
+<p>
+</p>
+
+
+
+<span id="example-requests-GETapi-v1-tasks--id-">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/tasks/3" \
     --header "Content-Type: application/json" \
-    --header "Accept: application/json" \
-    --data "{
-    \"title\": \"Learn Laravel\"
-}"
-</code></pre>                                        </div>
-                                    </div>
-                                </div>
-                                                            <div class="sl-bg-canvas-100 example-request example-request-javascript"
-                                     style="display: none;">
-                                    <div class="sl-px-0 sl-py-1">
-                                        <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
-                                            <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/tasks"
-);
+    --header "Accept: application/json"</code></pre></div>
 
-const headers = {
-    "Content-Type": "application/json",
-    "Accept": "application/json",
-};
 
-let body = {
-    "title": "Learn Laravel"
-};
-
-fetch(url, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(body),
-}).then(response =&gt; response.json());</code></pre>                                        </div>
-                                    </div>
-                                </div>
-                                                    </div>
-                    
-                                            <div class="sl-panel sl-outline-none sl-w-full sl-rounded-lg">
-                            <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-3 sl-pl-4 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-select-none">
-                                <div class="sl-flex sl-flex-1 sl-items-center sl-py-2">
-                                    <div class="sl--ml-2">
-                                        <div class="sl-h-sm sl-text-base sl-font-medium sl-px-1.5 sl-text-muted sl-rounded sl-border-transparent sl-border">
-                                            <div class="sl-mb-2 sl-inline-block">Example response:</div>
-                                            <div class="sl-mb-2 sl-inline-block">
-                                                <select
-                                                        class="example-response-POSTapi-v1-tasks-toggle sl-text-base"
-                                                        aria-label="Response sample"
-                                                        onchange="switchExampleResponse('POSTapi-v1-tasks', event.target.value);">
-                                                                                                            <option value="0">201</option>
-                                                                                                            <option value="1">422</option>
-                                                                                                            <option value="2">500</option>
-                                                                                                    </select></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button type="button"
-                                        class="sl-button sl-h-sm sl-text-base sl-font-medium sl-px-1.5 hover:sl-bg-canvas-50 active:sl-bg-canvas-100 sl-text-muted hover:sl-text-body focus:sl-text-body sl-rounded sl-border-transparent sl-border disabled:sl-opacity-70">
-                                    <div class="sl-mx-0">
-                                        <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="copy"
-                                             class="svg-inline--fa fa-copy fa-fw fa-sm sl-icon" role="img"
-                                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                                            <path fill="currentColor"
-                                                  d="M384 96L384 0h-112c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48H464c26.51 0 48-21.49 48-48V128h-95.1C398.4 128 384 113.6 384 96zM416 0v96h96L416 0zM192 352V128h-144c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48h192c26.51 0 48-21.49 48-48L288 416h-32C220.7 416 192 387.3 192 352z"></path>
-                                        </svg>
-                                    </div>
-                                </button>
-                            </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-POSTapi-v1-tasks example-response-POSTapi-v1-tasks-0"
-                                     style=" "
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
-    &quot;success&quot;: true,
-    &quot;data&quot;: {
-        &quot;id&quot;: 1,
-        &quot;title&quot;: &quot;Learn Laravel&quot;,
-        &quot;completed&quot;: false,
-        &quot;status&quot;: &quot;pending&quot;,
-        &quot;created_at&quot;: &quot;2025-09-21T10:00:00.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-09-21T10:00:00.000000Z&quot;,
-        &quot;deleted_at&quot;: null,
-        &quot;is_deleted&quot;: false
-    }
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-POSTapi-v1-tasks example-response-POSTapi-v1-tasks-1"
-                                     style=" display: none;"
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
-    &quot;success&quot;: false,
-    &quot;message&quot;: &quot;Validation failed&quot;,
-    &quot;errors&quot;: {
-        &quot;title&quot;: [
-            &quot;The title field is required.&quot;,
-            &quot;The title must be at least 3 characters.&quot;
-        ]
-    }
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-POSTapi-v1-tasks example-response-POSTapi-v1-tasks-2"
-                                     style=" display: none;"
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
-    &quot;success&quot;: false,
-    &quot;message&quot;: &quot;Could not create task&quot;
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                    </div>
-                            </div>
-    </div>
-</div>
-
-                    <div class="sl-stack sl-stack--vertical sl-stack--8 HttpOperation sl-flex sl-flex-col sl-items-stretch sl-w-full">
-    <div class="sl-stack sl-stack--vertical sl-stack--5 sl-flex sl-flex-col sl-items-stretch">
-        <div class="sl-relative">
-            <div class="sl-stack sl-stack--horizontal sl-stack--5 sl-flex sl-flex-row sl-items-center">
-                <h2 class="sl-text-3xl sl-leading-tight sl-font-prose sl-text-heading sl-mt-5 sl-mb-1"
-                    id="tasks-GETapi-v1-tasks--id-">
-                    Get a specific task
-                </h2>
-            </div>
-        </div>
-
-        <div class="sl-relative">
-            <div title="http://localhost/api/v1/tasks/{id}"
-                     class="sl-stack sl-stack--horizontal sl-stack--3 sl-inline-flex sl-flex-row sl-items-center sl-max-w-full sl-font-mono sl-py-2 sl-pr-4 sl-bg-canvas-50 sl-rounded-lg"
-                >
-                                            <div class="sl-text-lg sl-font-semibold sl-px-2.5 sl-py-1 sl-text-on-primary sl-rounded-lg"
-                             style="background-color: green;"
-                        >
-                            GET
-                        </div>
-                                        <div class="sl-flex sl-overflow-x-hidden sl-text-lg sl-select-all">
-                        <div dir="rtl"
-                             class="sl-overflow-x-hidden sl-truncate sl-text-muted">http://localhost</div>
-                        <div class="sl-flex-1 sl-font-semibold">/api/v1/tasks/{id}</div>
-                    </div>
-
-                                                            </div>
-        </div>
-
-        <p>Retrieve details of a single task by its ID.</p>
-    </div>
-    <div class="sl-flex">
-        <div data-testid="two-column-left" class="sl-flex-1 sl-w-0">
-            <div class="sl-stack sl-stack--vertical sl-stack--10 sl-flex sl-flex-col sl-items-stretch">
-                <div class="sl-stack sl-stack--vertical sl-stack--8 sl-flex sl-flex-col sl-items-stretch">
-                                            <div class="sl-stack sl-stack--vertical sl-stack--5 sl-flex sl-flex-col sl-items-stretch">
-                            <h3 class="sl-text-2xl sl-leading-snug sl-font-prose">
-                                Headers
-                            </h3>
-                            <div class="sl-text-sm">
-                                                                    <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">Content-Type</div>
-                                    </div>
-                                    </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        application/json
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                                    <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">Accept</div>
-                                    </div>
-                                    </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        application/json
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                            </div>
-                        </div>
-                    
-                                            <div class="sl-stack sl-stack--vertical sl-stack--6 sl-flex sl-flex-col sl-items-stretch">
-                            <h3 class="sl-text-2xl sl-leading-snug sl-font-prose">URL Parameters</h3>
-
-                            <div class="sl-text-sm">
-                                                                    <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">id</div>
-                                            <span class="sl-truncate sl-text-muted">integer</span>
-                                    </div>
-                                    <div class="sl-flex-1 sl-h-px sl-mx-3"></div>
-                    <span class="sl-ml-2 sl-text-warning">required</span>
-                                    </div>
-                <div class="sl-prose sl-markdown-viewer" style="font-size: 12px;">
-            <p>The ID of the task.</p>
-        </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        1
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                            </div>
-                        </div>
-                    
-
-                    
-                    
-                                    </div>
-            </div>
-        </div>
-
-        <div data-testid="two-column-right" class="sl-relative sl-w-2/5 sl-ml-16" style="max-width: 500px;">
-            <div class="sl-stack sl-stack--vertical sl-stack--6 sl-flex sl-flex-col sl-items-stretch">
-
-                                    <div class="sl-inverted">
-    <div class="sl-overflow-y-hidden sl-rounded-lg">
-        <form class="TryItPanel sl-bg-canvas-100 sl-rounded-lg"
-              data-method="GET"
-              data-path="api/v1/tasks/{id}"
-              data-hasfiles="0"
-              data-hasjsonbody="0">
-            
-                            <div class="sl-panel sl-outline-none sl-w-full expandable">
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            Headers
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                        <div class="ParameterGrid sl-p-4">
-                                                                                            <label aria-hidden="true"
-                                       for="header-GETapi-v1-tasks--id--Content-Type">Content-Type</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                        <input aria-label="Content-Type" name="Content-Type"
-                                               id="header-GETapi-v1-tasks--id--Content-Type"
-                                               value="application/json" data-component="header"
-                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
-                                    </div>
-                                </div>
-                                                                                            <label aria-hidden="true"
-                                       for="header-GETapi-v1-tasks--id--Accept">Accept</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                        <input aria-label="Accept" name="Accept"
-                                               id="header-GETapi-v1-tasks--id--Accept"
-                                               value="application/json" data-component="header"
-                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
-                                    </div>
-                                </div>
-                                                    </div>
-                    </div>
-                </div>
-            
-                            <div class="sl-panel sl-outline-none sl-w-full expandable">
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            URL Parameters
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                        <div class="ParameterGrid sl-p-4">
-                                                            <label aria-hidden="true"
-                                       for="urlparam-GETapi-v1-tasks--id--id">id</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                        <input aria-label="id" name="id"
-                                               id="urlparam-GETapi-v1-tasks--id--id"
-                                               placeholder="The ID of the task."
-                                               value="1" data-component="url"
-                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
-                                    </div>
-                                </div>
-                                                    </div>
-                    </div>
-                </div>
-            
-            
-            
-            <div class="SendButtonHolder sl-mt-4 sl-p-4 sl-pt-0">
-                <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-center">
-                    <button type="button" data-endpoint="GETapi-v1-tasks--id-"
-                            class="tryItOut-btn sl-button sl-h-sm sl-text-base sl-font-medium sl-px-1.5 sl-bg-primary hover:sl-bg-primary-dark active:sl-bg-primary-darker disabled:sl-bg-canvas-100 sl-text-on-primary disabled:sl-text-body sl-rounded sl-border-transparent sl-border disabled:sl-opacity-70"
-                    >
-                        Send Request 💥
-                    </button>
-                </div>
-            </div>
-
-            <div data-endpoint="GETapi-v1-tasks--id-"
-                 class="tryItOut-error expandable sl-panel sl-outline-none sl-w-full" hidden>
-                <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                     role="button">
-                    <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                        <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                            <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                 data-icon="caret-down"
-                                 class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                <path fill="currentColor"
-                                      d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                            </svg>
-                        </div>
-                        Request failed with error
-                    </div>
-                </div>
-                <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                    <div class="sl-panel__content sl-p-4">
-                        <p class="sl-pb-2"><strong class="error-message"></strong></p>
-                        <p class="sl-pb-2">Tip: Check that you&#039;re properly connected to the network.
-If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
-You can check the Dev Tools console for debugging information.</p>
-                    </div>
-                </div>
-            </div>
-
-                <div data-endpoint="GETapi-v1-tasks--id-"
-                     class="tryItOut-response expandable sl-panel sl-outline-none sl-w-full" hidden>
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            Received response
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                        <div class="sl-panel__content sl-p-4">
-                            <p class="sl-pb-2 response-status"></p>
-                            <pre><code class="sl-pb-2 response-content language-json"
-                                       data-empty-response-text="<Empty response>"
-                                       style="max-height: 300px;"></code></pre>
-                        </div>
-                    </div>
-                </div>
-        </form>
-    </div>
-</div>
-                
-                                            <div class="sl-panel sl-outline-none sl-w-full sl-rounded-lg">
-                            <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-3 sl-pl-4 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-select-none">
-                                <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                                    <div class="sl--ml-2">
-                                        Example request:
-                                        <select class="example-request-lang-toggle sl-text-base"
-                                                aria-label="Request Sample Language"
-                                                onchange="switchExampleLanguage(event.target.value);">
-                                                                                            <option>bash</option>
-                                                                                            <option>javascript</option>
-                                                                                    </select>
-                                    </div>
-                                </div>
-                            </div>
-                                                            <div class="sl-bg-canvas-100 example-request example-request-bash"
-                                     style="">
-                                    <div class="sl-px-0 sl-py-1">
-                                        <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
-                                            <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/v1/tasks/1" \
-    --header "Content-Type: application/json" \
-    --header "Accept: application/json"</code></pre>                                        </div>
-                                    </div>
-                                </div>
-                                                            <div class="sl-bg-canvas-100 example-request example-request-javascript"
-                                     style="display: none;">
-                                    <div class="sl-px-0 sl-py-1">
-                                        <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
-                                            <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/tasks/1"
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/tasks/3"
 );
 
 const headers = {
@@ -1704,482 +459,148 @@ const headers = {
 fetch(url, {
     method: "GET",
     headers,
-}).then(response =&gt; response.json());</code></pre>                                        </div>
-                                    </div>
-                                </div>
-                                                    </div>
-                    
-                                            <div class="sl-panel sl-outline-none sl-w-full sl-rounded-lg">
-                            <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-3 sl-pl-4 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-select-none">
-                                <div class="sl-flex sl-flex-1 sl-items-center sl-py-2">
-                                    <div class="sl--ml-2">
-                                        <div class="sl-h-sm sl-text-base sl-font-medium sl-px-1.5 sl-text-muted sl-rounded sl-border-transparent sl-border">
-                                            <div class="sl-mb-2 sl-inline-block">Example response:</div>
-                                            <div class="sl-mb-2 sl-inline-block">
-                                                <select
-                                                        class="example-response-GETapi-v1-tasks--id--toggle sl-text-base"
-                                                        aria-label="Response sample"
-                                                        onchange="switchExampleResponse('GETapi-v1-tasks--id-', event.target.value);">
-                                                                                                            <option value="0">200</option>
-                                                                                                            <option value="1">404</option>
-                                                                                                            <option value="2">500</option>
-                                                                                                    </select></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button type="button"
-                                        class="sl-button sl-h-sm sl-text-base sl-font-medium sl-px-1.5 hover:sl-bg-canvas-50 active:sl-bg-canvas-100 sl-text-muted hover:sl-text-body focus:sl-text-body sl-rounded sl-border-transparent sl-border disabled:sl-opacity-70">
-                                    <div class="sl-mx-0">
-                                        <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="copy"
-                                             class="svg-inline--fa fa-copy fa-fw fa-sm sl-icon" role="img"
-                                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                                            <path fill="currentColor"
-                                                  d="M384 96L384 0h-112c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48H464c26.51 0 48-21.49 48-48V128h-95.1C398.4 128 384 113.6 384 96zM416 0v96h96L416 0zM192 352V128h-144c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48h192c26.51 0 48-21.49 48-48L288 416h-32C220.7 416 192 387.3 192 352z"></path>
-                                        </svg>
-                                    </div>
-                                </button>
-                            </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-GETapi-v1-tasks--id- example-response-GETapi-v1-tasks--id--0"
-                                     style=" "
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-tasks--id-">
+            <blockquote>
+            <p>Example response (200):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+x-ratelimit-limit: 120
+x-ratelimit-remaining: 118
+access-control-allow-origin: *
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
     &quot;success&quot;: true,
     &quot;data&quot;: {
-        &quot;id&quot;: 1,
-        &quot;title&quot;: &quot;Complete project documentation&quot;,
-        &quot;completed&quot;: true,
-        &quot;status&quot;: &quot;completed&quot;,
-        &quot;created_at&quot;: &quot;2025-09-21T10:00:00.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-09-21T10:30:00.000000Z&quot;,
+        &quot;id&quot;: 3,
+        &quot;title&quot;: &quot;Possimus occaecati aut illum.&quot;,
+        &quot;completed&quot;: false,
+        &quot;status&quot;: &quot;pending&quot;,
+        &quot;created_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-09-22T07:14:38.000000Z&quot;,
         &quot;deleted_at&quot;: null,
         &quot;is_deleted&quot;: false
     }
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-GETapi-v1-tasks--id- example-response-GETapi-v1-tasks--id--1"
-                                     style=" display: none;"
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
-    &quot;success&quot;: false,
-    &quot;message&quot;: &quot;Task not found&quot;
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-GETapi-v1-tasks--id- example-response-GETapi-v1-tasks--id--2"
-                                     style=" display: none;"
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
-    &quot;success&quot;: false,
-    &quot;message&quot;: &quot;Internal server error&quot;
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                    </div>
-                            </div>
-    </div>
-</div>
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-tasks--id-" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-tasks--id-"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-tasks--id-"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-tasks--id-" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-tasks--id-">
 
-                    <div class="sl-stack sl-stack--vertical sl-stack--8 HttpOperation sl-flex sl-flex-col sl-items-stretch sl-w-full">
-    <div class="sl-stack sl-stack--vertical sl-stack--5 sl-flex sl-flex-col sl-items-stretch">
-        <div class="sl-relative">
-            <div class="sl-stack sl-stack--horizontal sl-stack--5 sl-flex sl-flex-row sl-items-center">
-                <h2 class="sl-text-3xl sl-leading-tight sl-font-prose sl-text-heading sl-mt-5 sl-mb-1"
-                    id="tasks-PUTapi-v1-tasks--id-">
-                    Update a task
-                </h2>
-            </div>
-        </div>
-
-        <div class="sl-relative">
-            <div title="http://localhost/api/v1/tasks/{id}"
-                     class="sl-stack sl-stack--horizontal sl-stack--3 sl-inline-flex sl-flex-row sl-items-center sl-max-w-full sl-font-mono sl-py-2 sl-pr-4 sl-bg-canvas-50 sl-rounded-lg"
-                >
-                                            <div class="sl-text-lg sl-font-semibold sl-px-2.5 sl-py-1 sl-text-on-primary sl-rounded-lg"
-                             style="background-color: darkblue;"
-                        >
-                            PUT
-                        </div>
-                                        <div class="sl-flex sl-overflow-x-hidden sl-text-lg sl-select-all">
-                        <div dir="rtl"
-                             class="sl-overflow-x-hidden sl-truncate sl-text-muted">http://localhost</div>
-                        <div class="sl-flex-1 sl-font-semibold">/api/v1/tasks/{id}</div>
-                    </div>
-
-                                                            </div>
-        </div>
-
-        <p>Update an existing task's title and/or completion status.</p>
-    </div>
-    <div class="sl-flex">
-        <div data-testid="two-column-left" class="sl-flex-1 sl-w-0">
-            <div class="sl-stack sl-stack--vertical sl-stack--10 sl-flex sl-flex-col sl-items-stretch">
-                <div class="sl-stack sl-stack--vertical sl-stack--8 sl-flex sl-flex-col sl-items-stretch">
-                                            <div class="sl-stack sl-stack--vertical sl-stack--5 sl-flex sl-flex-col sl-items-stretch">
-                            <h3 class="sl-text-2xl sl-leading-snug sl-font-prose">
-                                Headers
-                            </h3>
-                            <div class="sl-text-sm">
-                                                                    <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">Content-Type</div>
-                                    </div>
-                                    </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        application/json
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                                    <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">Accept</div>
-                                    </div>
-                                    </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        application/json
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                            </div>
-                        </div>
-                    
-                                            <div class="sl-stack sl-stack--vertical sl-stack--6 sl-flex sl-flex-col sl-items-stretch">
-                            <h3 class="sl-text-2xl sl-leading-snug sl-font-prose">URL Parameters</h3>
-
-                            <div class="sl-text-sm">
-                                                                    <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">id</div>
-                                            <span class="sl-truncate sl-text-muted">integer</span>
-                                    </div>
-                                    <div class="sl-flex-1 sl-h-px sl-mx-3"></div>
-                    <span class="sl-ml-2 sl-text-warning">required</span>
-                                    </div>
-                <div class="sl-prose sl-markdown-viewer" style="font-size: 12px;">
-            <p>The ID of the task to update.</p>
-        </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        1
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                            </div>
-                        </div>
-                    
-
-                    
-                                            <div class="sl-stack sl-stack--vertical sl-stack--6 sl-flex sl-flex-col sl-items-stretch">
-                            <h3 class="sl-text-2xl sl-leading-snug sl-font-prose">Body Parameters</h3>
-
-                                <div class="sl-text-sm">
-                                    <div class="expandable sl-text-sm sl-border-l sl-ml-px">
-        <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">title</div>
-                                            <span class="sl-truncate sl-text-muted">string</span>
-                                    </div>
-                                    </div>
-                <div class="sl-prose sl-markdown-viewer" style="font-size: 12px;">
-            <p>The new title of the task. Must be at least 3 characters.</p>
-        </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        Updated task title
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-
-            </div>
-    <div class="expandable sl-text-sm sl-border-l sl-ml-px">
-        <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">completed</div>
-                                            <span class="sl-truncate sl-text-muted">boolean</span>
-                                    </div>
-                                    </div>
-                <div class="sl-prose sl-markdown-viewer" style="font-size: 12px;">
-            <p>The completion status of the task.</p>
-        </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        true
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-
-            </div>
-                            </div>
-                        </div>
-                    
-                                    </div>
-            </div>
-        </div>
-
-        <div data-testid="two-column-right" class="sl-relative sl-w-2/5 sl-ml-16" style="max-width: 500px;">
-            <div class="sl-stack sl-stack--vertical sl-stack--6 sl-flex sl-flex-col sl-items-stretch">
-
-                                    <div class="sl-inverted">
-    <div class="sl-overflow-y-hidden sl-rounded-lg">
-        <form class="TryItPanel sl-bg-canvas-100 sl-rounded-lg"
-              data-method="PUT"
-              data-path="api/v1/tasks/{id}"
-              data-hasfiles="0"
-              data-hasjsonbody="1">
-            
-                            <div class="sl-panel sl-outline-none sl-w-full expandable">
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            Headers
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                        <div class="ParameterGrid sl-p-4">
-                                                                                            <label aria-hidden="true"
-                                       for="header-PUTapi-v1-tasks--id--Content-Type">Content-Type</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                        <input aria-label="Content-Type" name="Content-Type"
-                                               id="header-PUTapi-v1-tasks--id--Content-Type"
-                                               value="application/json" data-component="header"
-                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
-                                    </div>
-                                </div>
-                                                                                            <label aria-hidden="true"
-                                       for="header-PUTapi-v1-tasks--id--Accept">Accept</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                        <input aria-label="Accept" name="Accept"
-                                               id="header-PUTapi-v1-tasks--id--Accept"
-                                               value="application/json" data-component="header"
-                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
-                                    </div>
-                                </div>
-                                                    </div>
-                    </div>
-                </div>
-            
-                            <div class="sl-panel sl-outline-none sl-w-full expandable">
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            URL Parameters
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                        <div class="ParameterGrid sl-p-4">
-                                                            <label aria-hidden="true"
-                                       for="urlparam-PUTapi-v1-tasks--id--id">id</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                        <input aria-label="id" name="id"
-                                               id="urlparam-PUTapi-v1-tasks--id--id"
-                                               placeholder="The ID of the task to update."
-                                               value="1" data-component="url"
-                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
-                                    </div>
-                                </div>
-                                                    </div>
-                    </div>
-                </div>
-            
-            
-                            <div class="sl-panel sl-outline-none sl-w-full expandable">
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            Body
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                                                    <div class="TextRequestBody sl-p-4">
-                                <div class="code-editor language-json"
-                                     id="json-body-PUTapi-v1-tasks--id-"
-                                     style="font-family: var(--font-code); font-size: 12px; line-height: var(--lh-code);"
-                                >{
-    "title": "Updated task title",
-    "completed": true
-}</div>
-                            </div>
-                                            </div>
-                </div>
-            
-            <div class="SendButtonHolder sl-mt-4 sl-p-4 sl-pt-0">
-                <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-center">
-                    <button type="button" data-endpoint="PUTapi-v1-tasks--id-"
-                            class="tryItOut-btn sl-button sl-h-sm sl-text-base sl-font-medium sl-px-1.5 sl-bg-primary hover:sl-bg-primary-dark active:sl-bg-primary-darker disabled:sl-bg-canvas-100 sl-text-on-primary disabled:sl-text-body sl-rounded sl-border-transparent sl-border disabled:sl-opacity-70"
-                    >
-                        Send Request 💥
-                    </button>
-                </div>
-            </div>
-
-            <div data-endpoint="PUTapi-v1-tasks--id-"
-                 class="tryItOut-error expandable sl-panel sl-outline-none sl-w-full" hidden>
-                <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                     role="button">
-                    <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                        <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                            <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                 data-icon="caret-down"
-                                 class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                <path fill="currentColor"
-                                      d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                            </svg>
-                        </div>
-                        Request failed with error
-                    </div>
-                </div>
-                <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                    <div class="sl-panel__content sl-p-4">
-                        <p class="sl-pb-2"><strong class="error-message"></strong></p>
-                        <p class="sl-pb-2">Tip: Check that you&#039;re properly connected to the network.
+Tip: Check that you&#039;re properly connected to the network.
 If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
-You can check the Dev Tools console for debugging information.</p>
-                    </div>
-                </div>
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-tasks--id-" data-method="GET"
+      data-path="api/v1/tasks/{id}"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-tasks--id-', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-tasks--id-"
+                    onclick="tryItOut('GETapi-v1-tasks--id-');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-tasks--id-"
+                    onclick="cancelTryOut('GETapi-v1-tasks--id-');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-tasks--id-"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/tasks/{id}</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-tasks--id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
             </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-tasks--id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="id"                data-endpoint="GETapi-v1-tasks--id-"
+               value="3"
+               data-component="url">
+    <br>
+<p>The ID of the task. Example: <code>3</code></p>
+            </div>
+                    </form>
 
-                <div data-endpoint="PUTapi-v1-tasks--id-"
-                     class="tryItOut-response expandable sl-panel sl-outline-none sl-w-full" hidden>
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            Received response
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                        <div class="sl-panel__content sl-p-4">
-                            <p class="sl-pb-2 response-status"></p>
-                            <pre><code class="sl-pb-2 response-content language-json"
-                                       data-empty-response-text="<Empty response>"
-                                       style="max-height: 300px;"></code></pre>
-                        </div>
-                    </div>
-                </div>
-        </form>
-    </div>
-</div>
-                
-                                            <div class="sl-panel sl-outline-none sl-w-full sl-rounded-lg">
-                            <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-3 sl-pl-4 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-select-none">
-                                <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                                    <div class="sl--ml-2">
-                                        Example request:
-                                        <select class="example-request-lang-toggle sl-text-base"
-                                                aria-label="Request Sample Language"
-                                                onchange="switchExampleLanguage(event.target.value);">
-                                                                                            <option>bash</option>
-                                                                                            <option>javascript</option>
-                                                                                    </select>
-                                    </div>
-                                </div>
-                            </div>
-                                                            <div class="sl-bg-canvas-100 example-request example-request-bash"
-                                     style="">
-                                    <div class="sl-px-0 sl-py-1">
-                                        <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
-                                            <pre><code class="language-bash">curl --request PUT \
-    "http://localhost/api/v1/tasks/1" \
+                    <h2 id="tasks-POSTapi-v1-tasks">POST api/v1/tasks</h2>
+
+<p>
+</p>
+
+
+
+<span id="example-requests-POSTapi-v1-tasks">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/v1/tasks" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"title\": \"Updated task title\",
-    \"completed\": true
+    \"title\": \"bngzmiyvdljnikhwaykcmyuwpwlvqwrsitcpscqldzsnrwtujwvlxjklqppwqbewtnnoqitpxn\"
 }"
-</code></pre>                                        </div>
-                                    </div>
-                                </div>
-                                                            <div class="sl-bg-canvas-100 example-request example-request-javascript"
-                                     style="display: none;">
-                                    <div class="sl-px-0 sl-py-1">
-                                        <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
-                                            <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/tasks/1"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/tasks"
 );
 
 const headers = {
@@ -2188,7 +609,137 @@ const headers = {
 };
 
 let body = {
-    "title": "Updated task title",
+    "title": "bngzmiyvdljnikhwaykcmyuwpwlvqwrsitcpscqldzsnrwtujwvlxjklqppwqbewtnnoqitpxn"
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-tasks">
+</span>
+<span id="execution-results-POSTapi-v1-tasks" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-tasks"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-tasks"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-tasks" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-tasks">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-tasks" data-method="POST"
+      data-path="api/v1/tasks"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-tasks', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-tasks"
+                    onclick="tryItOut('POSTapi-v1-tasks');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-tasks"
+                    onclick="cancelTryOut('POSTapi-v1-tasks');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-tasks"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/tasks</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-tasks"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-tasks"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>title</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="title"                data-endpoint="POSTapi-v1-tasks"
+               value="bngzmiyvdljnikhwaykcmyuwpwlvqwrsitcpscqldzsnrwtujwvlxjklqppwqbewtnnoqitpxn"
+               data-component="body">
+    <br>
+<p>Must not be greater than 255 characters. Must be at least 3 characters. Example: <code>bngzmiyvdljnikhwaykcmyuwpwlvqwrsitcpscqldzsnrwtujwvlxjklqppwqbewtnnoqitpxn</code></p>
+        </div>
+        </form>
+
+                    <h2 id="tasks-PUTapi-v1-tasks--id-">PUT api/v1/tasks/{id}</h2>
+
+<p>
+</p>
+
+
+
+<span id="example-requests-PUTapi-v1-tasks--id-">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request PUT \
+    "http://localhost/api/v1/tasks/3" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"title\": \"bngzmiyvdljnikhwaykcmyuwpwlvqwrsitcpscqldzsnrwtujwvlxjklqppwqbewtnnoqitpxn\",
+    \"completed\": true
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/tasks/3"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "title": "bngzmiyvdljnikhwaykcmyuwpwlvqwrsitcpscqldzsnrwtujwvlxjklqppwqbewtnnoqitpxn",
     "completed": true
 };
 
@@ -2196,410 +747,149 @@ fetch(url, {
     method: "PUT",
     headers,
     body: JSON.stringify(body),
-}).then(response =&gt; response.json());</code></pre>                                        </div>
-                                    </div>
-                                </div>
-                                                    </div>
-                    
-                                            <div class="sl-panel sl-outline-none sl-w-full sl-rounded-lg">
-                            <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-3 sl-pl-4 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-select-none">
-                                <div class="sl-flex sl-flex-1 sl-items-center sl-py-2">
-                                    <div class="sl--ml-2">
-                                        <div class="sl-h-sm sl-text-base sl-font-medium sl-px-1.5 sl-text-muted sl-rounded sl-border-transparent sl-border">
-                                            <div class="sl-mb-2 sl-inline-block">Example response:</div>
-                                            <div class="sl-mb-2 sl-inline-block">
-                                                <select
-                                                        class="example-response-PUTapi-v1-tasks--id--toggle sl-text-base"
-                                                        aria-label="Response sample"
-                                                        onchange="switchExampleResponse('PUTapi-v1-tasks--id-', event.target.value);">
-                                                                                                            <option value="0">200</option>
-                                                                                                            <option value="1">404</option>
-                                                                                                            <option value="2">422</option>
-                                                                                                            <option value="3">500</option>
-                                                                                                    </select></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button type="button"
-                                        class="sl-button sl-h-sm sl-text-base sl-font-medium sl-px-1.5 hover:sl-bg-canvas-50 active:sl-bg-canvas-100 sl-text-muted hover:sl-text-body focus:sl-text-body sl-rounded sl-border-transparent sl-border disabled:sl-opacity-70">
-                                    <div class="sl-mx-0">
-                                        <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="copy"
-                                             class="svg-inline--fa fa-copy fa-fw fa-sm sl-icon" role="img"
-                                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                                            <path fill="currentColor"
-                                                  d="M384 96L384 0h-112c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48H464c26.51 0 48-21.49 48-48V128h-95.1C398.4 128 384 113.6 384 96zM416 0v96h96L416 0zM192 352V128h-144c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48h192c26.51 0 48-21.49 48-48L288 416h-32C220.7 416 192 387.3 192 352z"></path>
-                                        </svg>
-                                    </div>
-                                </button>
-                            </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-PUTapi-v1-tasks--id- example-response-PUTapi-v1-tasks--id--0"
-                                     style=" "
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
-    &quot;success&quot;: true,
-    &quot;data&quot;: {
-        &quot;id&quot;: 1,
-        &quot;title&quot;: &quot;Updated task title&quot;,
-        &quot;completed&quot;: true,
-        &quot;status&quot;: &quot;completed&quot;,
-        &quot;created_at&quot;: &quot;2025-09-21T10:00:00.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-09-21T10:35:00.000000Z&quot;,
-        &quot;deleted_at&quot;: null,
-        &quot;is_deleted&quot;: false
-    }
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-PUTapi-v1-tasks--id- example-response-PUTapi-v1-tasks--id--1"
-                                     style=" display: none;"
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
-    &quot;success&quot;: false,
-    &quot;message&quot;: &quot;Task not found&quot;
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-PUTapi-v1-tasks--id- example-response-PUTapi-v1-tasks--id--2"
-                                     style=" display: none;"
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
-    &quot;success&quot;: false,
-    &quot;message&quot;: &quot;Validation failed&quot;,
-    &quot;errors&quot;: {
-        &quot;title&quot;: [
-            &quot;The title must be at least 3 characters.&quot;
-        ]
-    }
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-PUTapi-v1-tasks--id- example-response-PUTapi-v1-tasks--id--3"
-                                     style=" display: none;"
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
-    &quot;success&quot;: false,
-    &quot;message&quot;: &quot;Could not update task&quot;
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                    </div>
-                            </div>
-    </div>
-</div>
+}).then(response =&gt; response.json());</code></pre></div>
 
-                    <div class="sl-stack sl-stack--vertical sl-stack--8 HttpOperation sl-flex sl-flex-col sl-items-stretch sl-w-full">
-    <div class="sl-stack sl-stack--vertical sl-stack--5 sl-flex sl-flex-col sl-items-stretch">
-        <div class="sl-relative">
-            <div class="sl-stack sl-stack--horizontal sl-stack--5 sl-flex sl-flex-row sl-items-center">
-                <h2 class="sl-text-3xl sl-leading-tight sl-font-prose sl-text-heading sl-mt-5 sl-mb-1"
-                    id="tasks-DELETEapi-v1-tasks--id-">
-                    Delete a task
-                </h2>
-            </div>
-        </div>
+</span>
 
-        <div class="sl-relative">
-            <div title="http://localhost/api/v1/tasks/{id}"
-                     class="sl-stack sl-stack--horizontal sl-stack--3 sl-inline-flex sl-flex-row sl-items-center sl-max-w-full sl-font-mono sl-py-2 sl-pr-4 sl-bg-canvas-50 sl-rounded-lg"
-                >
-                                            <div class="sl-text-lg sl-font-semibold sl-px-2.5 sl-py-1 sl-text-on-primary sl-rounded-lg"
-                             style="background-color: red;"
-                        >
-                            DELETE
-                        </div>
-                                        <div class="sl-flex sl-overflow-x-hidden sl-text-lg sl-select-all">
-                        <div dir="rtl"
-                             class="sl-overflow-x-hidden sl-truncate sl-text-muted">http://localhost</div>
-                        <div class="sl-flex-1 sl-font-semibold">/api/v1/tasks/{id}</div>
-                    </div>
+<span id="example-responses-PUTapi-v1-tasks--id-">
+</span>
+<span id="execution-results-PUTapi-v1-tasks--id-" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-PUTapi-v1-tasks--id-"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-PUTapi-v1-tasks--id-"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-PUTapi-v1-tasks--id-" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-PUTapi-v1-tasks--id-">
 
-                                                            </div>
-        </div>
-
-        <p>Soft delete a task (can be restored if needed).</p>
-    </div>
-    <div class="sl-flex">
-        <div data-testid="two-column-left" class="sl-flex-1 sl-w-0">
-            <div class="sl-stack sl-stack--vertical sl-stack--10 sl-flex sl-flex-col sl-items-stretch">
-                <div class="sl-stack sl-stack--vertical sl-stack--8 sl-flex sl-flex-col sl-items-stretch">
-                                            <div class="sl-stack sl-stack--vertical sl-stack--5 sl-flex sl-flex-col sl-items-stretch">
-                            <h3 class="sl-text-2xl sl-leading-snug sl-font-prose">
-                                Headers
-                            </h3>
-                            <div class="sl-text-sm">
-                                                                    <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">Content-Type</div>
-                                    </div>
-                                    </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        application/json
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                                    <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">Accept</div>
-                                    </div>
-                                    </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        application/json
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                            </div>
-                        </div>
-                    
-                                            <div class="sl-stack sl-stack--vertical sl-stack--6 sl-flex sl-flex-col sl-items-stretch">
-                            <h3 class="sl-text-2xl sl-leading-snug sl-font-prose">URL Parameters</h3>
-
-                            <div class="sl-text-sm">
-                                                                    <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">id</div>
-                                            <span class="sl-truncate sl-text-muted">integer</span>
-                                    </div>
-                                    <div class="sl-flex-1 sl-h-px sl-mx-3"></div>
-                    <span class="sl-ml-2 sl-text-warning">required</span>
-                                    </div>
-                <div class="sl-prose sl-markdown-viewer" style="font-size: 12px;">
-            <p>The ID of the task to delete.</p>
-        </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        1
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                            </div>
-                        </div>
-                    
-
-                    
-                    
-                                    </div>
-            </div>
-        </div>
-
-        <div data-testid="two-column-right" class="sl-relative sl-w-2/5 sl-ml-16" style="max-width: 500px;">
-            <div class="sl-stack sl-stack--vertical sl-stack--6 sl-flex sl-flex-col sl-items-stretch">
-
-                                    <div class="sl-inverted">
-    <div class="sl-overflow-y-hidden sl-rounded-lg">
-        <form class="TryItPanel sl-bg-canvas-100 sl-rounded-lg"
-              data-method="DELETE"
-              data-path="api/v1/tasks/{id}"
-              data-hasfiles="0"
-              data-hasjsonbody="0">
-            
-                            <div class="sl-panel sl-outline-none sl-w-full expandable">
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            Headers
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                        <div class="ParameterGrid sl-p-4">
-                                                                                            <label aria-hidden="true"
-                                       for="header-DELETEapi-v1-tasks--id--Content-Type">Content-Type</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                        <input aria-label="Content-Type" name="Content-Type"
-                                               id="header-DELETEapi-v1-tasks--id--Content-Type"
-                                               value="application/json" data-component="header"
-                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
-                                    </div>
-                                </div>
-                                                                                            <label aria-hidden="true"
-                                       for="header-DELETEapi-v1-tasks--id--Accept">Accept</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                        <input aria-label="Accept" name="Accept"
-                                               id="header-DELETEapi-v1-tasks--id--Accept"
-                                               value="application/json" data-component="header"
-                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
-                                    </div>
-                                </div>
-                                                    </div>
-                    </div>
-                </div>
-            
-                            <div class="sl-panel sl-outline-none sl-w-full expandable">
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            URL Parameters
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                        <div class="ParameterGrid sl-p-4">
-                                                            <label aria-hidden="true"
-                                       for="urlparam-DELETEapi-v1-tasks--id--id">id</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                        <input aria-label="id" name="id"
-                                               id="urlparam-DELETEapi-v1-tasks--id--id"
-                                               placeholder="The ID of the task to delete."
-                                               value="1" data-component="url"
-                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
-                                    </div>
-                                </div>
-                                                    </div>
-                    </div>
-                </div>
-            
-            
-            
-            <div class="SendButtonHolder sl-mt-4 sl-p-4 sl-pt-0">
-                <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-center">
-                    <button type="button" data-endpoint="DELETEapi-v1-tasks--id-"
-                            class="tryItOut-btn sl-button sl-h-sm sl-text-base sl-font-medium sl-px-1.5 sl-bg-primary hover:sl-bg-primary-dark active:sl-bg-primary-darker disabled:sl-bg-canvas-100 sl-text-on-primary disabled:sl-text-body sl-rounded sl-border-transparent sl-border disabled:sl-opacity-70"
-                    >
-                        Send Request 💥
-                    </button>
-                </div>
-            </div>
-
-            <div data-endpoint="DELETEapi-v1-tasks--id-"
-                 class="tryItOut-error expandable sl-panel sl-outline-none sl-w-full" hidden>
-                <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                     role="button">
-                    <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                        <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                            <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                 data-icon="caret-down"
-                                 class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                <path fill="currentColor"
-                                      d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                            </svg>
-                        </div>
-                        Request failed with error
-                    </div>
-                </div>
-                <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                    <div class="sl-panel__content sl-p-4">
-                        <p class="sl-pb-2"><strong class="error-message"></strong></p>
-                        <p class="sl-pb-2">Tip: Check that you&#039;re properly connected to the network.
+Tip: Check that you&#039;re properly connected to the network.
 If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
-You can check the Dev Tools console for debugging information.</p>
-                    </div>
-                </div>
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-PUTapi-v1-tasks--id-" data-method="PUT"
+      data-path="api/v1/tasks/{id}"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('PUTapi-v1-tasks--id-', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-PUTapi-v1-tasks--id-"
+                    onclick="tryItOut('PUTapi-v1-tasks--id-');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-PUTapi-v1-tasks--id-"
+                    onclick="cancelTryOut('PUTapi-v1-tasks--id-');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-PUTapi-v1-tasks--id-"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-darkblue">PUT</small>
+            <b><code>api/v1/tasks/{id}</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="PUTapi-v1-tasks--id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
             </div>
-
-                <div data-endpoint="DELETEapi-v1-tasks--id-"
-                     class="tryItOut-response expandable sl-panel sl-outline-none sl-w-full" hidden>
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            Received response
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                        <div class="sl-panel__content sl-p-4">
-                            <p class="sl-pb-2 response-status"></p>
-                            <pre><code class="sl-pb-2 response-content language-json"
-                                       data-empty-response-text="<Empty response>"
-                                       style="max-height: 300px;"></code></pre>
-                        </div>
-                    </div>
-                </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="PUTapi-v1-tasks--id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="id"                data-endpoint="PUTapi-v1-tasks--id-"
+               value="3"
+               data-component="url">
+    <br>
+<p>The ID of the task. Example: <code>3</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>title</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="title"                data-endpoint="PUTapi-v1-tasks--id-"
+               value="bngzmiyvdljnikhwaykcmyuwpwlvqwrsitcpscqldzsnrwtujwvlxjklqppwqbewtnnoqitpxn"
+               data-component="body">
+    <br>
+<p>Must not be greater than 255 characters. Must be at least 3 characters. Example: <code>bngzmiyvdljnikhwaykcmyuwpwlvqwrsitcpscqldzsnrwtujwvlxjklqppwqbewtnnoqitpxn</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>completed</code></b>&nbsp;&nbsp;
+<small>boolean</small>&nbsp;
+<i>optional</i> &nbsp;
+                <label data-endpoint="PUTapi-v1-tasks--id-" style="display: none">
+            <input type="radio" name="completed"
+                   value="true"
+                   data-endpoint="PUTapi-v1-tasks--id-"
+                   data-component="body"             >
+            <code>true</code>
+        </label>
+        <label data-endpoint="PUTapi-v1-tasks--id-" style="display: none">
+            <input type="radio" name="completed"
+                   value="false"
+                   data-endpoint="PUTapi-v1-tasks--id-"
+                   data-component="body"             >
+            <code>false</code>
+        </label>
+    <br>
+<p>Example: <code>true</code></p>
+        </div>
         </form>
-    </div>
-</div>
-                
-                                            <div class="sl-panel sl-outline-none sl-w-full sl-rounded-lg">
-                            <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-3 sl-pl-4 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-select-none">
-                                <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                                    <div class="sl--ml-2">
-                                        Example request:
-                                        <select class="example-request-lang-toggle sl-text-base"
-                                                aria-label="Request Sample Language"
-                                                onchange="switchExampleLanguage(event.target.value);">
-                                                                                            <option>bash</option>
-                                                                                            <option>javascript</option>
-                                                                                    </select>
-                                    </div>
-                                </div>
-                            </div>
-                                                            <div class="sl-bg-canvas-100 example-request example-request-bash"
-                                     style="">
-                                    <div class="sl-px-0 sl-py-1">
-                                        <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
-                                            <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/api/v1/tasks/1" \
+
+                    <h2 id="tasks-DELETEapi-v1-tasks--id-">DELETE api/v1/tasks/{id}</h2>
+
+<p>
+</p>
+
+
+
+<span id="example-requests-DELETEapi-v1-tasks--id-">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request DELETE \
+    "http://localhost/api/v1/tasks/3" \
     --header "Content-Type: application/json" \
-    --header "Accept: application/json"</code></pre>                                        </div>
-                                    </div>
-                                </div>
-                                                            <div class="sl-bg-canvas-100 example-request example-request-javascript"
-                                     style="display: none;">
-                                    <div class="sl-px-0 sl-py-1">
-                                        <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
-                                            <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/tasks/1"
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/tasks/3"
 );
 
 const headers = {
@@ -2610,379 +900,116 @@ const headers = {
 fetch(url, {
     method: "DELETE",
     headers,
-}).then(response =&gt; response.json());</code></pre>                                        </div>
-                                    </div>
-                                </div>
-                                                    </div>
-                    
-                                            <div class="sl-panel sl-outline-none sl-w-full sl-rounded-lg">
-                            <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-3 sl-pl-4 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-select-none">
-                                <div class="sl-flex sl-flex-1 sl-items-center sl-py-2">
-                                    <div class="sl--ml-2">
-                                        <div class="sl-h-sm sl-text-base sl-font-medium sl-px-1.5 sl-text-muted sl-rounded sl-border-transparent sl-border">
-                                            <div class="sl-mb-2 sl-inline-block">Example response:</div>
-                                            <div class="sl-mb-2 sl-inline-block">
-                                                <select
-                                                        class="example-response-DELETEapi-v1-tasks--id--toggle sl-text-base"
-                                                        aria-label="Response sample"
-                                                        onchange="switchExampleResponse('DELETEapi-v1-tasks--id-', event.target.value);">
-                                                                                                            <option value="0">204</option>
-                                                                                                            <option value="1">404</option>
-                                                                                                            <option value="2">500</option>
-                                                                                                    </select></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button type="button"
-                                        class="sl-button sl-h-sm sl-text-base sl-font-medium sl-px-1.5 hover:sl-bg-canvas-50 active:sl-bg-canvas-100 sl-text-muted hover:sl-text-body focus:sl-text-body sl-rounded sl-border-transparent sl-border disabled:sl-opacity-70">
-                                    <div class="sl-mx-0">
-                                        <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="copy"
-                                             class="svg-inline--fa fa-copy fa-fw fa-sm sl-icon" role="img"
-                                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                                            <path fill="currentColor"
-                                                  d="M384 96L384 0h-112c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48H464c26.51 0 48-21.49 48-48V128h-95.1C398.4 128 384 113.6 384 96zM416 0v96h96L416 0zM192 352V128h-144c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48h192c26.51 0 48-21.49 48-48L288 416h-32C220.7 416 192 387.3 192 352z"></path>
-                                        </svg>
-                                    </div>
-                                </button>
-                            </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-DELETEapi-v1-tasks--id- example-response-DELETEapi-v1-tasks--id--0"
-                                     style=" "
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                    <pre><code>[Empty response]</code></pre>
-                                                                            </div>
-                                </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-DELETEapi-v1-tasks--id- example-response-DELETEapi-v1-tasks--id--1"
-                                     style=" display: none;"
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
-    &quot;success&quot;: false,
-    &quot;message&quot;: &quot;Task not found&quot;
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-DELETEapi-v1-tasks--id- example-response-DELETEapi-v1-tasks--id--2"
-                                     style=" display: none;"
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
-    &quot;success&quot;: false,
-    &quot;message&quot;: &quot;Internal server error&quot;
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                    </div>
-                            </div>
-    </div>
-</div>
+}).then(response =&gt; response.json());</code></pre></div>
 
-                    <div class="sl-stack sl-stack--vertical sl-stack--8 HttpOperation sl-flex sl-flex-col sl-items-stretch sl-w-full">
-    <div class="sl-stack sl-stack--vertical sl-stack--5 sl-flex sl-flex-col sl-items-stretch">
-        <div class="sl-relative">
-            <div class="sl-stack sl-stack--horizontal sl-stack--5 sl-flex sl-flex-row sl-items-center">
-                <h2 class="sl-text-3xl sl-leading-tight sl-font-prose sl-text-heading sl-mt-5 sl-mb-1"
-                    id="tasks-PATCHapi-v1-tasks--id--complete">
-                    Mark task as complete
-                </h2>
-            </div>
-        </div>
+</span>
 
-        <div class="sl-relative">
-            <div title="http://localhost/api/v1/tasks/{id}/complete"
-                     class="sl-stack sl-stack--horizontal sl-stack--3 sl-inline-flex sl-flex-row sl-items-center sl-max-w-full sl-font-mono sl-py-2 sl-pr-4 sl-bg-canvas-50 sl-rounded-lg"
-                >
-                                            <div class="sl-text-lg sl-font-semibold sl-px-2.5 sl-py-1 sl-text-on-primary sl-rounded-lg"
-                             style="background-color: purple;"
-                        >
-                            PATCH
-                        </div>
-                                        <div class="sl-flex sl-overflow-x-hidden sl-text-lg sl-select-all">
-                        <div dir="rtl"
-                             class="sl-overflow-x-hidden sl-truncate sl-text-muted">http://localhost</div>
-                        <div class="sl-flex-1 sl-font-semibold">/api/v1/tasks/{id}/complete</div>
-                    </div>
+<span id="example-responses-DELETEapi-v1-tasks--id-">
+</span>
+<span id="execution-results-DELETEapi-v1-tasks--id-" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-DELETEapi-v1-tasks--id-"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-DELETEapi-v1-tasks--id-"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-DELETEapi-v1-tasks--id-" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-DELETEapi-v1-tasks--id-">
 
-                                                            </div>
-        </div>
-
-        <p>Mark a specific task as completed.</p>
-    </div>
-    <div class="sl-flex">
-        <div data-testid="two-column-left" class="sl-flex-1 sl-w-0">
-            <div class="sl-stack sl-stack--vertical sl-stack--10 sl-flex sl-flex-col sl-items-stretch">
-                <div class="sl-stack sl-stack--vertical sl-stack--8 sl-flex sl-flex-col sl-items-stretch">
-                                            <div class="sl-stack sl-stack--vertical sl-stack--5 sl-flex sl-flex-col sl-items-stretch">
-                            <h3 class="sl-text-2xl sl-leading-snug sl-font-prose">
-                                Headers
-                            </h3>
-                            <div class="sl-text-sm">
-                                                                    <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">Content-Type</div>
-                                    </div>
-                                    </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        application/json
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                                    <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">Accept</div>
-                                    </div>
-                                    </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        application/json
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                            </div>
-                        </div>
-                    
-                                            <div class="sl-stack sl-stack--vertical sl-stack--6 sl-flex sl-flex-col sl-items-stretch">
-                            <h3 class="sl-text-2xl sl-leading-snug sl-font-prose">URL Parameters</h3>
-
-                            <div class="sl-text-sm">
-                                                                    <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">id</div>
-                                            <span class="sl-truncate sl-text-muted">integer</span>
-                                    </div>
-                                    <div class="sl-flex-1 sl-h-px sl-mx-3"></div>
-                    <span class="sl-ml-2 sl-text-warning">required</span>
-                                    </div>
-                <div class="sl-prose sl-markdown-viewer" style="font-size: 12px;">
-            <p>The ID of the task to mark as complete.</p>
-        </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        1
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                            </div>
-                        </div>
-                    
-
-                    
-                    
-                                    </div>
-            </div>
-        </div>
-
-        <div data-testid="two-column-right" class="sl-relative sl-w-2/5 sl-ml-16" style="max-width: 500px;">
-            <div class="sl-stack sl-stack--vertical sl-stack--6 sl-flex sl-flex-col sl-items-stretch">
-
-                                    <div class="sl-inverted">
-    <div class="sl-overflow-y-hidden sl-rounded-lg">
-        <form class="TryItPanel sl-bg-canvas-100 sl-rounded-lg"
-              data-method="PATCH"
-              data-path="api/v1/tasks/{id}/complete"
-              data-hasfiles="0"
-              data-hasjsonbody="0">
-            
-                            <div class="sl-panel sl-outline-none sl-w-full expandable">
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            Headers
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                        <div class="ParameterGrid sl-p-4">
-                                                                                            <label aria-hidden="true"
-                                       for="header-PATCHapi-v1-tasks--id--complete-Content-Type">Content-Type</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                        <input aria-label="Content-Type" name="Content-Type"
-                                               id="header-PATCHapi-v1-tasks--id--complete-Content-Type"
-                                               value="application/json" data-component="header"
-                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
-                                    </div>
-                                </div>
-                                                                                            <label aria-hidden="true"
-                                       for="header-PATCHapi-v1-tasks--id--complete-Accept">Accept</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                        <input aria-label="Accept" name="Accept"
-                                               id="header-PATCHapi-v1-tasks--id--complete-Accept"
-                                               value="application/json" data-component="header"
-                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
-                                    </div>
-                                </div>
-                                                    </div>
-                    </div>
-                </div>
-            
-                            <div class="sl-panel sl-outline-none sl-w-full expandable">
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            URL Parameters
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                        <div class="ParameterGrid sl-p-4">
-                                                            <label aria-hidden="true"
-                                       for="urlparam-PATCHapi-v1-tasks--id--complete-id">id</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                        <input aria-label="id" name="id"
-                                               id="urlparam-PATCHapi-v1-tasks--id--complete-id"
-                                               placeholder="The ID of the task to mark as complete."
-                                               value="1" data-component="url"
-                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
-                                    </div>
-                                </div>
-                                                    </div>
-                    </div>
-                </div>
-            
-            
-            
-            <div class="SendButtonHolder sl-mt-4 sl-p-4 sl-pt-0">
-                <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-center">
-                    <button type="button" data-endpoint="PATCHapi-v1-tasks--id--complete"
-                            class="tryItOut-btn sl-button sl-h-sm sl-text-base sl-font-medium sl-px-1.5 sl-bg-primary hover:sl-bg-primary-dark active:sl-bg-primary-darker disabled:sl-bg-canvas-100 sl-text-on-primary disabled:sl-text-body sl-rounded sl-border-transparent sl-border disabled:sl-opacity-70"
-                    >
-                        Send Request 💥
-                    </button>
-                </div>
-            </div>
-
-            <div data-endpoint="PATCHapi-v1-tasks--id--complete"
-                 class="tryItOut-error expandable sl-panel sl-outline-none sl-w-full" hidden>
-                <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                     role="button">
-                    <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                        <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                            <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                 data-icon="caret-down"
-                                 class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                <path fill="currentColor"
-                                      d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                            </svg>
-                        </div>
-                        Request failed with error
-                    </div>
-                </div>
-                <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                    <div class="sl-panel__content sl-p-4">
-                        <p class="sl-pb-2"><strong class="error-message"></strong></p>
-                        <p class="sl-pb-2">Tip: Check that you&#039;re properly connected to the network.
+Tip: Check that you&#039;re properly connected to the network.
 If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
-You can check the Dev Tools console for debugging information.</p>
-                    </div>
-                </div>
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-DELETEapi-v1-tasks--id-" data-method="DELETE"
+      data-path="api/v1/tasks/{id}"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('DELETEapi-v1-tasks--id-', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-DELETEapi-v1-tasks--id-"
+                    onclick="tryItOut('DELETEapi-v1-tasks--id-');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-DELETEapi-v1-tasks--id-"
+                    onclick="cancelTryOut('DELETEapi-v1-tasks--id-');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-DELETEapi-v1-tasks--id-"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-red">DELETE</small>
+            <b><code>api/v1/tasks/{id}</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="DELETEapi-v1-tasks--id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
             </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="DELETEapi-v1-tasks--id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="id"                data-endpoint="DELETEapi-v1-tasks--id-"
+               value="3"
+               data-component="url">
+    <br>
+<p>The ID of the task. Example: <code>3</code></p>
+            </div>
+                    </form>
 
-                <div data-endpoint="PATCHapi-v1-tasks--id--complete"
-                     class="tryItOut-response expandable sl-panel sl-outline-none sl-w-full" hidden>
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            Received response
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                        <div class="sl-panel__content sl-p-4">
-                            <p class="sl-pb-2 response-status"></p>
-                            <pre><code class="sl-pb-2 response-content language-json"
-                                       data-empty-response-text="<Empty response>"
-                                       style="max-height: 300px;"></code></pre>
-                        </div>
-                    </div>
-                </div>
-        </form>
-    </div>
-</div>
-                
-                                            <div class="sl-panel sl-outline-none sl-w-full sl-rounded-lg">
-                            <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-3 sl-pl-4 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-select-none">
-                                <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                                    <div class="sl--ml-2">
-                                        Example request:
-                                        <select class="example-request-lang-toggle sl-text-base"
-                                                aria-label="Request Sample Language"
-                                                onchange="switchExampleLanguage(event.target.value);">
-                                                                                            <option>bash</option>
-                                                                                            <option>javascript</option>
-                                                                                    </select>
-                                    </div>
-                                </div>
-                            </div>
-                                                            <div class="sl-bg-canvas-100 example-request example-request-bash"
-                                     style="">
-                                    <div class="sl-px-0 sl-py-1">
-                                        <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
-                                            <pre><code class="language-bash">curl --request PATCH \
-    "http://localhost/api/v1/tasks/1/complete" \
+                    <h2 id="tasks-PATCHapi-v1-tasks--id--complete">PATCH api/v1/tasks/{id}/complete</h2>
+
+<p>
+</p>
+
+
+
+<span id="example-requests-PATCHapi-v1-tasks--id--complete">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request PATCH \
+    "http://localhost/api/v1/tasks/3/complete" \
     --header "Content-Type: application/json" \
-    --header "Accept: application/json"</code></pre>                                        </div>
-                                    </div>
-                                </div>
-                                                            <div class="sl-bg-canvas-100 example-request example-request-javascript"
-                                     style="display: none;">
-                                    <div class="sl-px-0 sl-py-1">
-                                        <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
-                                            <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/tasks/1/complete"
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/tasks/3/complete"
 );
 
 const headers = {
@@ -2993,405 +1020,116 @@ const headers = {
 fetch(url, {
     method: "PATCH",
     headers,
-}).then(response =&gt; response.json());</code></pre>                                        </div>
-                                    </div>
-                                </div>
-                                                    </div>
-                    
-                                            <div class="sl-panel sl-outline-none sl-w-full sl-rounded-lg">
-                            <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-3 sl-pl-4 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-select-none">
-                                <div class="sl-flex sl-flex-1 sl-items-center sl-py-2">
-                                    <div class="sl--ml-2">
-                                        <div class="sl-h-sm sl-text-base sl-font-medium sl-px-1.5 sl-text-muted sl-rounded sl-border-transparent sl-border">
-                                            <div class="sl-mb-2 sl-inline-block">Example response:</div>
-                                            <div class="sl-mb-2 sl-inline-block">
-                                                <select
-                                                        class="example-response-PATCHapi-v1-tasks--id--complete-toggle sl-text-base"
-                                                        aria-label="Response sample"
-                                                        onchange="switchExampleResponse('PATCHapi-v1-tasks--id--complete', event.target.value);">
-                                                                                                            <option value="0">200</option>
-                                                                                                            <option value="1">404</option>
-                                                                                                            <option value="2">422</option>
-                                                                                                            <option value="3">500</option>
-                                                                                                    </select></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button type="button"
-                                        class="sl-button sl-h-sm sl-text-base sl-font-medium sl-px-1.5 hover:sl-bg-canvas-50 active:sl-bg-canvas-100 sl-text-muted hover:sl-text-body focus:sl-text-body sl-rounded sl-border-transparent sl-border disabled:sl-opacity-70">
-                                    <div class="sl-mx-0">
-                                        <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="copy"
-                                             class="svg-inline--fa fa-copy fa-fw fa-sm sl-icon" role="img"
-                                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                                            <path fill="currentColor"
-                                                  d="M384 96L384 0h-112c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48H464c26.51 0 48-21.49 48-48V128h-95.1C398.4 128 384 113.6 384 96zM416 0v96h96L416 0zM192 352V128h-144c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48h192c26.51 0 48-21.49 48-48L288 416h-32C220.7 416 192 387.3 192 352z"></path>
-                                        </svg>
-                                    </div>
-                                </button>
-                            </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-PATCHapi-v1-tasks--id--complete example-response-PATCHapi-v1-tasks--id--complete-0"
-                                     style=" "
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
-    &quot;success&quot;: true,
-    &quot;data&quot;: {
-        &quot;id&quot;: 1,
-        &quot;title&quot;: &quot;Complete project documentation&quot;,
-        &quot;completed&quot;: true,
-        &quot;status&quot;: &quot;completed&quot;,
-        &quot;created_at&quot;: &quot;2025-09-21T10:00:00.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-09-21T10:40:00.000000Z&quot;,
-        &quot;deleted_at&quot;: null,
-        &quot;is_deleted&quot;: false
-    }
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-PATCHapi-v1-tasks--id--complete example-response-PATCHapi-v1-tasks--id--complete-1"
-                                     style=" display: none;"
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
-    &quot;success&quot;: false,
-    &quot;message&quot;: &quot;Task not found&quot;
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-PATCHapi-v1-tasks--id--complete example-response-PATCHapi-v1-tasks--id--complete-2"
-                                     style=" display: none;"
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
-    &quot;success&quot;: false,
-    &quot;message&quot;: &quot;Could not complete task&quot;
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-PATCHapi-v1-tasks--id--complete example-response-PATCHapi-v1-tasks--id--complete-3"
-                                     style=" display: none;"
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
-    &quot;success&quot;: false,
-    &quot;message&quot;: &quot;Could not complete task&quot;
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                    </div>
-                            </div>
-    </div>
-</div>
+}).then(response =&gt; response.json());</code></pre></div>
 
-                    <div class="sl-stack sl-stack--vertical sl-stack--8 HttpOperation sl-flex sl-flex-col sl-items-stretch sl-w-full">
-    <div class="sl-stack sl-stack--vertical sl-stack--5 sl-flex sl-flex-col sl-items-stretch">
-        <div class="sl-relative">
-            <div class="sl-stack sl-stack--horizontal sl-stack--5 sl-flex sl-flex-row sl-items-center">
-                <h2 class="sl-text-3xl sl-leading-tight sl-font-prose sl-text-heading sl-mt-5 sl-mb-1"
-                    id="tasks-PATCHapi-v1-tasks--id--pending">
-                    Mark task as pending
-                </h2>
-            </div>
-        </div>
+</span>
 
-        <div class="sl-relative">
-            <div title="http://localhost/api/v1/tasks/{id}/pending"
-                     class="sl-stack sl-stack--horizontal sl-stack--3 sl-inline-flex sl-flex-row sl-items-center sl-max-w-full sl-font-mono sl-py-2 sl-pr-4 sl-bg-canvas-50 sl-rounded-lg"
-                >
-                                            <div class="sl-text-lg sl-font-semibold sl-px-2.5 sl-py-1 sl-text-on-primary sl-rounded-lg"
-                             style="background-color: purple;"
-                        >
-                            PATCH
-                        </div>
-                                        <div class="sl-flex sl-overflow-x-hidden sl-text-lg sl-select-all">
-                        <div dir="rtl"
-                             class="sl-overflow-x-hidden sl-truncate sl-text-muted">http://localhost</div>
-                        <div class="sl-flex-1 sl-font-semibold">/api/v1/tasks/{id}/pending</div>
-                    </div>
+<span id="example-responses-PATCHapi-v1-tasks--id--complete">
+</span>
+<span id="execution-results-PATCHapi-v1-tasks--id--complete" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-PATCHapi-v1-tasks--id--complete"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-PATCHapi-v1-tasks--id--complete"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-PATCHapi-v1-tasks--id--complete" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-PATCHapi-v1-tasks--id--complete">
 
-                                                            </div>
-        </div>
-
-        <p>Mark a specific task as pending (not completed).</p>
-    </div>
-    <div class="sl-flex">
-        <div data-testid="two-column-left" class="sl-flex-1 sl-w-0">
-            <div class="sl-stack sl-stack--vertical sl-stack--10 sl-flex sl-flex-col sl-items-stretch">
-                <div class="sl-stack sl-stack--vertical sl-stack--8 sl-flex sl-flex-col sl-items-stretch">
-                                            <div class="sl-stack sl-stack--vertical sl-stack--5 sl-flex sl-flex-col sl-items-stretch">
-                            <h3 class="sl-text-2xl sl-leading-snug sl-font-prose">
-                                Headers
-                            </h3>
-                            <div class="sl-text-sm">
-                                                                    <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">Content-Type</div>
-                                    </div>
-                                    </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        application/json
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                                    <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">Accept</div>
-                                    </div>
-                                    </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        application/json
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                            </div>
-                        </div>
-                    
-                                            <div class="sl-stack sl-stack--vertical sl-stack--6 sl-flex sl-flex-col sl-items-stretch">
-                            <h3 class="sl-text-2xl sl-leading-snug sl-font-prose">URL Parameters</h3>
-
-                            <div class="sl-text-sm">
-                                                                    <div class="sl-flex sl-relative sl-max-w-full sl-py-2 sl-pl-3">
-    <div class="sl-w-1 sl-mt-2 sl-mr-3 sl--ml-3 sl-border-t"></div>
-    <div class="sl-stack sl-stack--vertical sl-stack--1 sl-flex sl-flex-1 sl-flex-col sl-items-stretch sl-max-w-full sl-ml-2 ">
-        <div class="sl-flex sl-items-center sl-max-w-full">
-                                        <div class="sl-flex sl-items-baseline sl-text-base">
-                    <div class="sl-font-mono sl-font-semibold sl-mr-2">id</div>
-                                            <span class="sl-truncate sl-text-muted">integer</span>
-                                    </div>
-                                    <div class="sl-flex-1 sl-h-px sl-mx-3"></div>
-                    <span class="sl-ml-2 sl-text-warning">required</span>
-                                    </div>
-                <div class="sl-prose sl-markdown-viewer" style="font-size: 12px;">
-            <p>The ID of the task to mark as pending.</p>
-        </div>
-                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
-                <span>Example:</span> <!-- <span> important for spacing -->
-                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
-                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        1
-                    </div>
-                </div>
-            </div>
-            </div>
-</div>
-                                                            </div>
-                        </div>
-                    
-
-                    
-                    
-                                    </div>
-            </div>
-        </div>
-
-        <div data-testid="two-column-right" class="sl-relative sl-w-2/5 sl-ml-16" style="max-width: 500px;">
-            <div class="sl-stack sl-stack--vertical sl-stack--6 sl-flex sl-flex-col sl-items-stretch">
-
-                                    <div class="sl-inverted">
-    <div class="sl-overflow-y-hidden sl-rounded-lg">
-        <form class="TryItPanel sl-bg-canvas-100 sl-rounded-lg"
-              data-method="PATCH"
-              data-path="api/v1/tasks/{id}/pending"
-              data-hasfiles="0"
-              data-hasjsonbody="0">
-            
-                            <div class="sl-panel sl-outline-none sl-w-full expandable">
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            Headers
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                        <div class="ParameterGrid sl-p-4">
-                                                                                            <label aria-hidden="true"
-                                       for="header-PATCHapi-v1-tasks--id--pending-Content-Type">Content-Type</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                        <input aria-label="Content-Type" name="Content-Type"
-                                               id="header-PATCHapi-v1-tasks--id--pending-Content-Type"
-                                               value="application/json" data-component="header"
-                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
-                                    </div>
-                                </div>
-                                                                                            <label aria-hidden="true"
-                                       for="header-PATCHapi-v1-tasks--id--pending-Accept">Accept</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                        <input aria-label="Accept" name="Accept"
-                                               id="header-PATCHapi-v1-tasks--id--pending-Accept"
-                                               value="application/json" data-component="header"
-                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
-                                    </div>
-                                </div>
-                                                    </div>
-                    </div>
-                </div>
-            
-                            <div class="sl-panel sl-outline-none sl-w-full expandable">
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            URL Parameters
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                        <div class="ParameterGrid sl-p-4">
-                                                            <label aria-hidden="true"
-                                       for="urlparam-PATCHapi-v1-tasks--id--pending-id">id</label>
-                                <span class="sl-mx-3">:</span>
-                                <div class="sl-flex sl-flex-1">
-                                    <div class="sl-input sl-flex-1 sl-relative">
-                                        <input aria-label="id" name="id"
-                                               id="urlparam-PATCHapi-v1-tasks--id--pending-id"
-                                               placeholder="The ID of the task to mark as pending."
-                                               value="1" data-component="url"
-                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
-                                    </div>
-                                </div>
-                                                    </div>
-                    </div>
-                </div>
-            
-            
-            
-            <div class="SendButtonHolder sl-mt-4 sl-p-4 sl-pt-0">
-                <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-center">
-                    <button type="button" data-endpoint="PATCHapi-v1-tasks--id--pending"
-                            class="tryItOut-btn sl-button sl-h-sm sl-text-base sl-font-medium sl-px-1.5 sl-bg-primary hover:sl-bg-primary-dark active:sl-bg-primary-darker disabled:sl-bg-canvas-100 sl-text-on-primary disabled:sl-text-body sl-rounded sl-border-transparent sl-border disabled:sl-opacity-70"
-                    >
-                        Send Request 💥
-                    </button>
-                </div>
-            </div>
-
-            <div data-endpoint="PATCHapi-v1-tasks--id--pending"
-                 class="tryItOut-error expandable sl-panel sl-outline-none sl-w-full" hidden>
-                <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                     role="button">
-                    <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                        <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                            <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                 data-icon="caret-down"
-                                 class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                <path fill="currentColor"
-                                      d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                            </svg>
-                        </div>
-                        Request failed with error
-                    </div>
-                </div>
-                <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                    <div class="sl-panel__content sl-p-4">
-                        <p class="sl-pb-2"><strong class="error-message"></strong></p>
-                        <p class="sl-pb-2">Tip: Check that you&#039;re properly connected to the network.
+Tip: Check that you&#039;re properly connected to the network.
 If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
-You can check the Dev Tools console for debugging information.</p>
-                    </div>
-                </div>
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-PATCHapi-v1-tasks--id--complete" data-method="PATCH"
+      data-path="api/v1/tasks/{id}/complete"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('PATCHapi-v1-tasks--id--complete', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-PATCHapi-v1-tasks--id--complete"
+                    onclick="tryItOut('PATCHapi-v1-tasks--id--complete');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-PATCHapi-v1-tasks--id--complete"
+                    onclick="cancelTryOut('PATCHapi-v1-tasks--id--complete');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-PATCHapi-v1-tasks--id--complete"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-purple">PATCH</small>
+            <b><code>api/v1/tasks/{id}/complete</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="PATCHapi-v1-tasks--id--complete"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
             </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="PATCHapi-v1-tasks--id--complete"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="id"                data-endpoint="PATCHapi-v1-tasks--id--complete"
+               value="3"
+               data-component="url">
+    <br>
+<p>The ID of the task. Example: <code>3</code></p>
+            </div>
+                    </form>
 
-                <div data-endpoint="PATCHapi-v1-tasks--id--pending"
-                     class="tryItOut-response expandable sl-panel sl-outline-none sl-w-full" hidden>
-                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
-                         role="button">
-                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
-                                     data-icon="caret-down"
-                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path fill="currentColor"
-                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-                                </svg>
-                            </div>
-                            Received response
-                        </div>
-                    </div>
-                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
-                        <div class="sl-panel__content sl-p-4">
-                            <p class="sl-pb-2 response-status"></p>
-                            <pre><code class="sl-pb-2 response-content language-json"
-                                       data-empty-response-text="<Empty response>"
-                                       style="max-height: 300px;"></code></pre>
-                        </div>
-                    </div>
-                </div>
-        </form>
-    </div>
-</div>
-                
-                                            <div class="sl-panel sl-outline-none sl-w-full sl-rounded-lg">
-                            <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-3 sl-pl-4 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-select-none">
-                                <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
-                                    <div class="sl--ml-2">
-                                        Example request:
-                                        <select class="example-request-lang-toggle sl-text-base"
-                                                aria-label="Request Sample Language"
-                                                onchange="switchExampleLanguage(event.target.value);">
-                                                                                            <option>bash</option>
-                                                                                            <option>javascript</option>
-                                                                                    </select>
-                                    </div>
-                                </div>
-                            </div>
-                                                            <div class="sl-bg-canvas-100 example-request example-request-bash"
-                                     style="">
-                                    <div class="sl-px-0 sl-py-1">
-                                        <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
-                                            <pre><code class="language-bash">curl --request PATCH \
-    "http://localhost/api/v1/tasks/1/pending" \
+                    <h2 id="tasks-PATCHapi-v1-tasks--id--pending">PATCH api/v1/tasks/{id}/pending</h2>
+
+<p>
+</p>
+
+
+
+<span id="example-requests-PATCHapi-v1-tasks--id--pending">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request PATCH \
+    "http://localhost/api/v1/tasks/3/pending" \
     --header "Content-Type: application/json" \
-    --header "Accept: application/json"</code></pre>                                        </div>
-                                    </div>
-                                </div>
-                                                            <div class="sl-bg-canvas-100 example-request example-request-javascript"
-                                     style="display: none;">
-                                    <div class="sl-px-0 sl-py-1">
-                                        <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
-                                            <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/tasks/1/pending"
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/tasks/3/pending"
 );
 
 const headers = {
@@ -3402,146 +1140,105 @@ const headers = {
 fetch(url, {
     method: "PATCH",
     headers,
-}).then(response =&gt; response.json());</code></pre>                                        </div>
-                                    </div>
-                                </div>
-                                                    </div>
-                    
-                                            <div class="sl-panel sl-outline-none sl-w-full sl-rounded-lg">
-                            <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-3 sl-pl-4 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-select-none">
-                                <div class="sl-flex sl-flex-1 sl-items-center sl-py-2">
-                                    <div class="sl--ml-2">
-                                        <div class="sl-h-sm sl-text-base sl-font-medium sl-px-1.5 sl-text-muted sl-rounded sl-border-transparent sl-border">
-                                            <div class="sl-mb-2 sl-inline-block">Example response:</div>
-                                            <div class="sl-mb-2 sl-inline-block">
-                                                <select
-                                                        class="example-response-PATCHapi-v1-tasks--id--pending-toggle sl-text-base"
-                                                        aria-label="Response sample"
-                                                        onchange="switchExampleResponse('PATCHapi-v1-tasks--id--pending', event.target.value);">
-                                                                                                            <option value="0">200</option>
-                                                                                                            <option value="1">404</option>
-                                                                                                            <option value="2">422</option>
-                                                                                                            <option value="3">500</option>
-                                                                                                    </select></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button type="button"
-                                        class="sl-button sl-h-sm sl-text-base sl-font-medium sl-px-1.5 hover:sl-bg-canvas-50 active:sl-bg-canvas-100 sl-text-muted hover:sl-text-body focus:sl-text-body sl-rounded sl-border-transparent sl-border disabled:sl-opacity-70">
-                                    <div class="sl-mx-0">
-                                        <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="copy"
-                                             class="svg-inline--fa fa-copy fa-fw fa-sm sl-icon" role="img"
-                                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                                            <path fill="currentColor"
-                                                  d="M384 96L384 0h-112c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48H464c26.51 0 48-21.49 48-48V128h-95.1C398.4 128 384 113.6 384 96zM416 0v96h96L416 0zM192 352V128h-144c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48h192c26.51 0 48-21.49 48-48L288 416h-32C220.7 416 192 387.3 192 352z"></path>
-                                        </svg>
-                                    </div>
-                                </button>
-                            </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-PATCHapi-v1-tasks--id--pending example-response-PATCHapi-v1-tasks--id--pending-0"
-                                     style=" "
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
-    &quot;success&quot;: true,
-    &quot;data&quot;: {
-        &quot;id&quot;: 1,
-        &quot;title&quot;: &quot;Complete project documentation&quot;,
-        &quot;completed&quot;: false,
-        &quot;status&quot;: &quot;pending&quot;,
-        &quot;created_at&quot;: &quot;2025-09-21T10:00:00.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-09-21T10:45:00.000000Z&quot;,
-        &quot;deleted_at&quot;: null,
-        &quot;is_deleted&quot;: false
-    }
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-PATCHapi-v1-tasks--id--pending example-response-PATCHapi-v1-tasks--id--pending-1"
-                                     style=" display: none;"
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
-    &quot;success&quot;: false,
-    &quot;message&quot;: &quot;Task not found&quot;
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-PATCHapi-v1-tasks--id--pending example-response-PATCHapi-v1-tasks--id--pending-2"
-                                     style=" display: none;"
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
-    &quot;success&quot;: false,
-    &quot;message&quot;: &quot;Could not mark task as pending&quot;
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-PATCHapi-v1-tasks--id--pending example-response-PATCHapi-v1-tasks--id--pending-3"
-                                     style=" display: none;"
-                                >
-                                    <div class="sl-panel__content sl-p-0">                                                                                                                                
-                                            <pre><code style="max-height: 300px;"
-                                                       class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
-    &quot;success&quot;: false,
-    &quot;message&quot;: &quot;Could not mark task as pending&quot;
-}</code></pre>
-                                                                            </div>
-                                </div>
-                                                    </div>
-                            </div>
-    </div>
-</div>
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-PATCHapi-v1-tasks--id--pending">
+</span>
+<span id="execution-results-PATCHapi-v1-tasks--id--pending" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-PATCHapi-v1-tasks--id--pending"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-PATCHapi-v1-tasks--id--pending"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-PATCHapi-v1-tasks--id--pending" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-PATCHapi-v1-tasks--id--pending">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-PATCHapi-v1-tasks--id--pending" data-method="PATCH"
+      data-path="api/v1/tasks/{id}/pending"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('PATCHapi-v1-tasks--id--pending', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-PATCHapi-v1-tasks--id--pending"
+                    onclick="tryItOut('PATCHapi-v1-tasks--id--pending');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-PATCHapi-v1-tasks--id--pending"
+                    onclick="cancelTryOut('PATCHapi-v1-tasks--id--pending');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-PATCHapi-v1-tasks--id--pending"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-purple">PATCH</small>
+            <b><code>api/v1/tasks/{id}/pending</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="PATCHapi-v1-tasks--id--pending"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="PATCHapi-v1-tasks--id--pending"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="id"                data-endpoint="PATCHapi-v1-tasks--id--pending"
+               value="3"
+               data-component="url">
+    <br>
+<p>The ID of the task. Example: <code>3</code></p>
+            </div>
+                    </form>
 
             
 
-        <div class="sl-prose sl-markdown-viewer sl-my-5">
-            
-        </div>
+        
     </div>
-
+    <div class="dark-box">
+                    <div class="lang-selector">
+                                                        <button type="button" class="lang-button" data-language-name="bash">bash</button>
+                                                        <button type="button" class="lang-button" data-language-name="javascript">javascript</button>
+                            </div>
+            </div>
 </div>
-
-<template id="expand-chevron">
-    <svg aria-hidden="true" focusable="false" data-prefix="fas"
-         data-icon="chevron-right"
-         class="svg-inline--fa fa-chevron-right fa-fw sl-icon sl-text-muted"
-         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-        <path fill="currentColor"
-              d="M96 480c-8.188 0-16.38-3.125-22.62-9.375c-12.5-12.5-12.5-32.75 0-45.25L242.8 256L73.38 86.63c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0l192 192c12.5 12.5 12.5 32.75 0 45.25l-192 192C112.4 476.9 104.2 480 96 480z"></path>
-    </svg>
-</template>
-
-<template id="expanded-chevron">
-    <svg aria-hidden="true" focusable="false" data-prefix="fas"
-         data-icon="chevron-down"
-         class="svg-inline--fa fa-chevron-down fa-fw sl-icon sl-text-muted"
-         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-        <path fill="currentColor"
-              d="M224 416c-8.188 0-16.38-3.125-22.62-9.375l-192-192c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L224 338.8l169.4-169.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-192 192C240.4 412.9 232.2 416 224 416z"></path>
-    </svg>
-</template>
-
-<template id="expand-chevron-solid">
-    <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="caret-right"
-         class="svg-inline--fa fa-caret-right fa-fw sl-icon" role="img" xmlns="http://www.w3.org/2000/svg"
-         viewBox="0 0 256 512">
-        <path fill="currentColor"
-              d="M118.6 105.4l128 127.1C252.9 239.6 256 247.8 256 255.1s-3.125 16.38-9.375 22.63l-128 127.1c-9.156 9.156-22.91 11.9-34.88 6.943S64 396.9 64 383.1V128c0-12.94 7.781-24.62 19.75-29.58S109.5 96.23 118.6 105.4z"></path>
-    </svg>
-</template>
-
-<template id="expanded-chevron-solid">
-    <svg aria-hidden="true" focusable="false" data-prefix="fas"
-         data-icon="caret-down"
-         class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
-         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-        <path fill="currentColor"
-              d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
-    </svg>
-</template>
 </body>
 </html>

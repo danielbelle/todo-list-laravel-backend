@@ -48,10 +48,6 @@ return [
                 'api/v1/tasks*',
             ],
             'apply' => [
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json',
-                ],
                 'response_calls' => [
                     'methods' => ['GET', 'POST', 'PUT', 'PATCH'],
                     'config' => [
@@ -69,7 +65,7 @@ return [
     'type' => 'laravel',
 
     // See https://scribe.knuckles.wtf/laravel/reference/config#theme for supported options
-    'theme' => 'elements',
+    'theme' => 'default',
 
     'static' => [
         // HTML documentation, assets and Postman collection will be generated to this folder.
